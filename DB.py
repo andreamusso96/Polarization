@@ -48,6 +48,15 @@ class DBGet:
         return sim_ids
 
     @staticmethod
+    def get_ids_complete_simulations() -> List[int]:
+        sim_table = Table("sim_table", metadata_obj, autoload_with=engine)
+        with engine.begin() as conn:
+            stmt = select(sim_table.c.sim_id).where(sim_table.c.complete == True)
+            sim_ids = conn.execute(stmt).scalars().all()
+
+        return sim_ids
+
+    @staticmethod
     def get_parameters_incomplete_simulations() -> List[Parameters]:
         sim_table = Table("sim_table", metadata_obj, autoload_with=engine)
         with engine.begin() as conn:
@@ -181,6 +190,12 @@ class DB:
     def get_parameters_simulation(sim_id: int) -> Parameters:
         return DBGet.get_parameters_simulation(sim_id=sim_id)
 
+    @staticmethod
+    def get_complete_jobs() -> List[int]:
+        return DBGet.get_ids_complete_simulations()
+
+
 
 if __name__ == '__main__':
-    DBCreateTable.create_simulation_table()
+    #DBCreateTable.create_simulation_table()
+    print(DB.get_complete_jobs())
