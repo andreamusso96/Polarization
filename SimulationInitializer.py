@@ -18,7 +18,7 @@ class SimulationInitializer:
 
     @staticmethod
     def get_d0_parameters() -> List[DistributionParameters]:
-        sample_size = 10 ** 5
+        sample_size = 10 ** 6
         bin_size = 0.05
         ub = 0.5
         lb = -0.5
@@ -28,7 +28,7 @@ class SimulationInitializer:
 
     @staticmethod
     def get_other_params() -> Tuple[int, int]:
-        s_max = 10**3
+        s_max = 10**4
         n_save_distribution = 10**2
         return s_max, n_save_distribution
 
