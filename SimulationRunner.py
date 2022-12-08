@@ -9,15 +9,15 @@ class SimulationRunner:
     @staticmethod
     def run_simulations():
         ids_sims_to_run = DB.get_ids_incomplete_simulations()
-        ids_sims_to_run = ids_sims_to_run[:4]
+        ids_sims_to_run = ids_sims_to_run[:10]
         for sim_id in ids_sims_to_run:
             if is_cluster:
-                args_sim = ['ARGUMENT FOR CLUSTER']
+                args_sim = ['sbatch', '--time=', str(20), '--wrap="', 'python', '-m', 'main', str(sim_id), '"']
             else:
                 args_sim = ['python', '-m', 'main', str(sim_id)]
 
             os.system(" ".join(args_sim))
-            print('RUNNING SIMULATION', sim_id)
+            print('SUBMITTED', sim_id)
             time.sleep(1)
 
 
@@ -29,5 +29,5 @@ def check():
     return 0
 
 if __name__ == '__main__':
-    #SimulationRunner.run_simulations()
-    check()
+    SimulationRunner.run_simulations()
+    #check()
