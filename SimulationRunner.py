@@ -12,12 +12,13 @@ class SimulationRunner:
         ids_sims_to_run = ids_sims_to_run[:10]
         for sim_id in ids_sims_to_run:
             if is_cluster:
-                args_sim = ['sbatch', '--time=', str(20), '--wrap="', 'python', '-m', 'main', str(sim_id), '"']
+                time_in_mins = 20
+                args_sim = ['sbatch', f'--time={time_in_mins}', f'--wrap="python -m main {str(sim_id)}"']
             else:
                 args_sim = ['python', '-m', 'main', str(sim_id)]
 
             os.system(" ".join(args_sim))
-            print('SUBMITTED', sim_id)
+            print('SUBMITTED', sim_id, 'COMMAND', " ".join(args_sim))
             time.sleep(1)
 
 
