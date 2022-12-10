@@ -3,13 +3,14 @@ from config import is_cluster
 
 import os
 import time
+import numpy as np
 
 
 class SimulationRunner:
     @staticmethod
     def run_simulations():
         ids_sims_to_run = DB.get_ids_incomplete_simulations()
-        ids_sims_to_run = ids_sims_to_run[:10]
+        ids_sims_to_run = np.sort(np.random.choice(ids_sims_to_run, size=10))
         for sim_id in ids_sims_to_run:
             if is_cluster:
                 time_in_mins = 20
@@ -23,10 +24,10 @@ class SimulationRunner:
 
 
 def check():
-    incomp_sim = DB.get_parameters_incomplete_simulations()
     ids_incom_sim = DB.get_ids_incomplete_simulations()
-    sim_id = 1
-    sres = DB.get_simulation_result(sim_id=sim_id)
+    sim_id = [1,2,3,4,5]
+    for s in sim_id:
+        sres = DB.get_simulation_result(sim_id=s)
     return 0
 
 if __name__ == '__main__':
