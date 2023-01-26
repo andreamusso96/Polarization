@@ -24,9 +24,9 @@ class SimulationInitializer:
 
     @staticmethod
     def get_other_params() -> Tuple[int, int, float, float, float]:
-        s_max = 10**2
-        n_save_distribution = 10**2
-        bound = 10.0
+        s_max = 10**3
+        n_save_distribution = 10**3
+        bound = 20.0
         bin_size = 0.05
         total_density_threshold = 0.8
         return s_max, n_save_distribution, bound, bin_size, total_density_threshold
@@ -35,8 +35,8 @@ class SimulationInitializer:
     def get_ts_rs_es() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         num = 7
         ts = np.linspace(0.1, 0.7, num=num)
-        rs = np.array([1]) #np.linspace(0.1, 1, num=num)
-        es = np.array([0.5]) #np.linspace(0.1, 1, num=num)
+        rs = np.linspace(0.3, 1, num=num)
+        es = np.array([0.2, 0.5, 0.8]) #np.linspace(0.1, 1, num=num)
         return ts, rs, es
 
     @staticmethod
