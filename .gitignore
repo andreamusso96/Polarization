@@ -162,3 +162,5 @@ cython_debug/
 ## MY FILES
 OldCode/
 .DS_Store
+Plotting/
+Test.ipynb
