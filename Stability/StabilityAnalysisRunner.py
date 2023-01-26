@@ -7,7 +7,7 @@ from typing import Tuple, List
 class StabilityAnalysisRunner:
     @staticmethod
     def get_parameters_stability_analysis() -> Tuple[np.ndarray, np.ndarray, np.ndarray, int]:
-        num = 3
+        num = 10
         ts = np.linspace(0.1, 1, num=num)
         rs = np.linspace(0.1, 1, num=num)
         es = np.linspace(0.1, 1, num=num)

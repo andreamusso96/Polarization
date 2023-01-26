@@ -8,7 +8,15 @@ class SimulationStatisticPlotter:
     @staticmethod
     def plot_heat_map_sim_statistic(heat_maps: List[HeatMap]) -> None:
         sim_ids = list(range(1,1000))
-        heat_maps_dfs = [DB.get_heat_map_df(x_axis=heat_map.x_axis, y_axis=heat_map.y_axis, z_val=heat_map.z_val, f_name=heat_map.f_name, sim_ids=sim_ids) for heat_map in heat_maps]
+        heat_maps_dfs = [DB.get_heat_map_sim_statistics(x_axis=heat_map.x_axis, y_axis=heat_map.y_axis, z_val=heat_map.z_val, f_name=heat_map.f_name, sim_ids=sim_ids) for heat_map in heat_maps]
+        HeatMapPlotter.plot_heat_maps(heat_maps=heat_maps_dfs)
+
+
+class StabilityPlotter:
+    @staticmethod
+    def plot_heat_map_sim_statistic(heat_maps: List[HeatMap]) -> None:
+        heat_maps_dfs = [DB.get_heat_map_stability(x_axis=heat_map.x_axis, y_axis=heat_map.y_axis, z_val=heat_map.z_val,
+                                           f_name=heat_map.f_name) for heat_map in heat_maps]
         HeatMapPlotter.plot_heat_maps(heat_maps=heat_maps_dfs)
 
 
@@ -20,7 +28,7 @@ class SingleSimulationPlotter:
         plot.plot_simulation()
 
 
-def plot_heat_maps():
+def plot_heat_maps_sim_statistics():
     heat_maps = [HeatMap(x_axis='t', y_axis='r', z_val='l2_norm_diff', f_name='avg'),
                  HeatMap(x_axis='t', y_axis='e', z_val='l2_norm_diff', f_name='avg'),
                  HeatMap(x_axis='e', y_axis='r', z_val='l2_norm_diff', f_name='avg'),
@@ -28,6 +36,12 @@ def plot_heat_maps():
                  HeatMap(x_axis='t', y_axis='r', z_val='l2_norm_end', f_name='max')]
     SimulationStatisticPlotter.plot_heat_map_sim_statistic(heat_maps=heat_maps)
 
+
+def plot_heat_maps_stability():
+    heat_maps = [HeatMap(x_axis='t', y_axis='r', z_val='stable', f_name='avg'),
+                 HeatMap(x_axis='t', y_axis='e', z_val='stable', f_name='avg'),
+                 HeatMap(x_axis='e', y_axis='r', z_val='stable', f_name='avg')]
+    StabilityPlotter.plot_heat_map_sim_statistic(heat_maps=heat_maps)
 
 def get_sids_to_plot():
     ts = [0.1, 0.3, 0.5, 0.8, 1]
@@ -53,5 +67,4 @@ def plot_results():
         SingleSimulationPlotter.plot_result(sim_id=sid)
 
 if __name__ == '__main__':
-    for i in range(1,8):
-        SingleSimulationPlotter.plot_result(sim_id=i)
+    plot_heat_maps_stability()

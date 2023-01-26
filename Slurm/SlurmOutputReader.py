@@ -3,6 +3,7 @@ from config import CODE_PATH
 from typing import Dict, List
 import pandas as pd
 
+
 class TerminationReason:
     success = 'success'
     database_locked = 'database_locked'
@@ -13,6 +14,7 @@ class SlurmOutputReader:
     def __init__(self, file_path, file_name):
         self.file_path = file_path
         self.file_name = file_name
+        self.sim_id = self.get_sim_id()
 
     def get_termination_reason(self):
         if not self.simulation_successful():
@@ -21,6 +23,8 @@ class SlurmOutputReader:
             counts = self.get_counts_dict()
             counts[TerminationReason.success] = 1
 
+        counts['file_name'] = self.file_name
+        counts['sim_id'] = self.sim_id
         return counts
 
     def read_output(self):
@@ -47,6 +51,15 @@ class SlurmOutputReader:
                 counts[TerminationReason.time_limit_reached] += 1
 
         return counts
+
+    def get_sim_id(self) -> int:
+        lines = self.read_output()
+        sim_id = None
+        for line in lines:
+            if 'SIM ID' in line:
+                sim_id = int(line.split(' ')[-1])
+
+        return sim_id
 
     @staticmethod
     def get_counts_dict() -> Dict[str, int]:
