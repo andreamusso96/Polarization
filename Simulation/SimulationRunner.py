@@ -9,6 +9,7 @@ class SimulationRunner:
     @staticmethod
     def get_ids_incomplete_simulations():
         ids_incomplete_simulations = DB.get_ids_with_parameter_value(param_value=ParameterValue(name='complete', value=False))
+        ids_incomplete_simulations = [sim_id for sim_id in ids_incomplete_simulations if sim_id > 999]
         return ids_incomplete_simulations
 
     @staticmethod

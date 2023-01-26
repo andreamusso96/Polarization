@@ -1,6 +1,6 @@
 from Simulation.Distribution import DistributionParameters
 from Simulation.Parameters import SimulationParameters
-from Database.DB import DB
+from Database.DB import DB, engine
 
 from typing import List, Tuple
 import numpy as np
@@ -15,7 +15,7 @@ class SimulationInitializerHighVarianceSimulations:
     def get_params():
         ids = SimulationInitializerHighVarianceSimulations.get_ids()
         params = [DB.get_simulation_parameters(sim_id=sim_id) for sim_id in ids]
-        return params
+        return SimulationInitializerHighVarianceSimulations.change_ids(params=params, shift=1000)
 
     @staticmethod
     def get_modified_params():
@@ -23,9 +23,14 @@ class SimulationInitializerHighVarianceSimulations:
         modified_params = []
         for p in params:
             p.bin_size = 0.01
-            p.sim_id = p.sim_id + 1000
             modified_params.append(p)
-        return modified_params
+        return SimulationInitializerHighVarianceSimulations.change_ids(params=params, shift=2000)
+
+    @staticmethod
+    def change_ids(params: List[SimulationParameters], shift: int) -> List[SimulationParameters]:
+        for p in params:
+            p.sim_id = p.sim_id + shift
+        return params
 
     @staticmethod
     def insert_simulation_parameters_in_db():
