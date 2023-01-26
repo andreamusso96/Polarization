@@ -11,10 +11,8 @@ from Simulation.Parameters import SimulationParameters
 from Simulation.Simulator import SimulationResult
 from Stability.StabilityAnalysis import StabilityResult
 from SimulationAnalysis.SimulationStatistics import SimulationStatistics
-from typing import Tuple, List
+from typing import List
 import pandas as pd
-from sqlalchemy import exc
-import time
 
 
 class DB:
