@@ -15,6 +15,11 @@ class GetTable:
         return sim_stats
 
     @staticmethod
+    def get_stability_stable():
+        stability_table = Table("stability", metadata_obj, autoload_with=engine)
+        return stability_table
+
+    @staticmethod
     def get_l2_norm_table(sim_id: int):
         l2_norm = Table(f"l2_norm_{sim_id}", metadata_obj, autoload_with=engine)
         return l2_norm
@@ -54,6 +59,20 @@ class CreateTable:
         return simulation_statistics_table
 
     @staticmethod
+    def create_stability_table() -> Table:
+        stability_table = Table("stability", metadata_obj,
+                                Column("pk", Integer, primary_key=True),
+                                Column("t", Float),
+                                Column("r", Float),
+                                Column("e", Float),
+                                Column("max_eig", Float),
+                                Column("stable", Boolean),
+                                Column("max_frequency", Integer),
+                                Column("max_eigs_far_from_max_frequency", Boolean))
+        metadata_obj.create_all(bind=engine, tables=[stability_table])
+        return stability_table
+
+    @staticmethod
     def create_l2_norm_table(sim_id: int) -> Table:
         l2_norm_table = Table(f"l2_norm_{sim_id}",
                               metadata_obj,
@@ -72,3 +91,7 @@ class CreateTable:
                                     Column("dist_value", Float))
         metadata_obj.create_all(bind=engine, tables=[distributions_table])
         return distributions_table
+
+
+if __name__ == '__main__':
+    CreateTable.create_stability_table()

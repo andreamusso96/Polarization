@@ -3,7 +3,8 @@ from Database.Engine import engine
 from Database.Parameters import DBParameters
 from Simulation.Parameters import SimulationParameters
 from Simulation.Simulator import SimulationResult
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, exc
+import time
 import pandas as pd
 
 
@@ -35,6 +36,7 @@ class DBResult:
     def insert_simulation_result(sim_result: SimulationResult):
         DBResult.insert_result_in_l2_norm_table(simulation_result=sim_result)
         DBResult.insert_result_in_distribution_table(simulation_result=sim_result)
+
 
     @staticmethod
     def insert_result_in_l2_norm_table(simulation_result: SimulationResult):

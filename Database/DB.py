@@ -5,10 +5,14 @@ from Database.SimulationStatistics import DBStatistics
 from Database.Result import DBResult, Result
 from Database.SimulationBookKeeping import BookKeeper
 from Database.HeatMaps import DBHeatMaps
+from Database.ResultStability import DBStability
 from Simulation.Parameters import SimulationParameters
 from Simulation.Simulator import SimulationResult
+from Stability.StabilityAnalysis import StabilityResult
 from typing import Tuple, List
 import pandas as pd
+from sqlalchemy import exc
+import time
 
 
 class DB:
@@ -37,11 +41,29 @@ class DB:
 
     @staticmethod
     def insert_simulation_result(simulation_result: SimulationResult):
-        CreateTable.create_l2_norm_table(sim_id=simulation_result.params.sim_id)
-        CreateTable.create_distributions_table(simulation_result=simulation_result)
-        DBResult.insert_simulation_result(sim_result=simulation_result)
-        BookKeeper.set_simulation_complete_to_true(sim_id=simulation_result.params.sim_id)
-        BookKeeper.set_simulation_success(sim_id=simulation_result.params.sim_id, success=simulation_result.res_scipy.success)
+        try:
+            CreateTable.create_l2_norm_table(sim_id=simulation_result.params.sim_id)
+            CreateTable.create_distributions_table(simulation_result=simulation_result)
+            DBResult.insert_simulation_result(sim_result=simulation_result)
+            BookKeeper.set_simulation_complete_to_true(sim_id=simulation_result.params.sim_id)
+            BookKeeper.set_simulation_success(sim_id=simulation_result.params.sim_id, success=simulation_result.res_scipy.success)
+        except exc.OperationalError as e:
+            if e.args[0] == '(sqlite3.OperationalError) database is locked':
+                time.sleep(10)
+                DB.insert_simulation_result(simulation_result=simulation_result)
+
+    # Stability Result
+    @staticmethod
+    def get_stability_result(t: float, r: float, e: float) -> StabilityResult:
+        return DBStability.get_stability_result(t=t, r=r, e=e)
+
+    @staticmethod
+    def get_all_stability_results() -> List[StabilityResult]:
+        return DBStability.get_all_stability_results()
+
+    @staticmethod
+    def insert_stability_result(stability_result: StabilityResult) -> None:
+        DBStability.insert_stability_result(stability_result=stability_result)
 
     # SimID
     @staticmethod
