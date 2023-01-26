@@ -13,6 +13,7 @@ from Stability.StabilityAnalysis import StabilityResult
 from SimulationAnalysis.SimulationStatistics import SimulationStatistics
 from typing import List
 import pandas as pd
+from sqlalchemy import text
 
 
 class DB:
@@ -27,7 +28,7 @@ class DB:
     @staticmethod
     def insert_simulation_parameters(simulation_parameters: SimulationParameters):
         with engine.begin() as conn:
-            conn.execute(f"PRAGMA busy_timeout = {DB.busy_timeout}")
+            conn.execute(text(f"PRAGMA busy_timeout = {DB.busy_timeout}"))
             DBParameters.insert_parameters(conn=conn, params=simulation_parameters)
 
     # Simulation statistics
@@ -50,7 +51,7 @@ class DB:
     @staticmethod
     def insert_simulation_result(simulation_result: SimulationResult):
         with engine.begin() as conn:
-            conn.execute(f"PRAGMA busy_timeout = {DB.busy_timeout}")
+            conn.execute(text(f"PRAGMA busy_timeout = {DB.busy_timeout}"))
             CreateTable.create_l2_norm_table(sim_id=simulation_result.params.sim_id)
             CreateTable.create_distributions_table(simulation_result=simulation_result)
             DBResult.insert_simulation_result(conn=conn, sim_result=simulation_result)
