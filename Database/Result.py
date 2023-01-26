@@ -17,7 +17,7 @@ class Result:
 class DBResult:
     @staticmethod
     def get_simulation_result(conn: Connection, sim_id: int) -> Result:
-        params = DBParameters.get_simulation_parameters(sim_id=sim_id)
+        params = DBParameters.get_simulation_parameters(conn=conn, sim_id=sim_id)
         l2_norm_table = GetTable.get_l2_norm_table(sim_id=sim_id)
         distributions_table = GetTable.get_distributions_table(sim_id=sim_id)
         stmt_l2_norm = select(l2_norm_table)

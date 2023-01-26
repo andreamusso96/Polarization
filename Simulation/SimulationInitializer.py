@@ -6,6 +6,35 @@ from typing import List, Tuple
 import numpy as np
 
 
+class SimulationInitializerHighVarianceSimulations:
+    @staticmethod
+    def get_ids() -> List[int]:
+        return [18, 27, 31, 32, 33, 34, 52, 53, 81, 96, 109, 111, 119, 127, 128, 129, 130, 133, 135, 136, 143, 144]
+
+    @staticmethod
+    def get_params():
+        ids = SimulationInitializerHighVarianceSimulations.get_ids()
+        params = [DB.get_simulation_parameters(sim_id=sim_id) for sim_id in ids]
+        return params
+
+    @staticmethod
+    def get_modified_params():
+        params = SimulationInitializerHighVarianceSimulations.get_params()
+        modified_params = []
+        for p in params:
+            p.bin_size = 0.01
+            p.sim_id = p.sim_id + 1000
+            modified_params.append(p)
+        return modified_params
+
+    @staticmethod
+    def insert_simulation_parameters_in_db():
+        simulation_parameters_list = SimulationInitializerHighVarianceSimulations.get_params()
+        simulation_parameters_list += SimulationInitializerHighVarianceSimulations.get_modified_params()
+        for sim_param in simulation_parameters_list:
+            DB.insert_simulation_parameters(simulation_parameters=sim_param)
+
+
 class SimulationInitializer:
     @staticmethod
     def get_sim_ids(n_sims: int) -> List[int]:
@@ -70,5 +99,4 @@ class SimulationInitializer:
 if __name__ == '__main__':
     from Database.Tables import CreateTable
     CreateTable.create_simulation_table()
-    CreateTable.create_simulation_statistics_table()
-    SimulationInitializer.insert_simulation_parameters_in_db()
+    SimulationInitializerHighVarianceSimulations.insert_simulation_parameters_in_db()

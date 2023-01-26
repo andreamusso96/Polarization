@@ -1,3 +1,5 @@
+import pandas as pd
+
 from Plotting.HeatMap import HeatMapPlotter, HeatMap
 from Plotting.SingleSimulation import SingleSimulationPlot
 from Database.DB import DB, ParameterRange
@@ -62,9 +64,29 @@ def get_sids_to_plot():
     return sids_plot
 
 def plot_results():
-    sim_ids = DB.get_all_sim_ids()
-    for sid in sim_ids:
+    from Database.Parameters import ParameterValue
+    import numpy as np
+    ids = DB.get_ids_with_parameter_value(param_value=ParameterValue(name='complete', value=True))
+    special_ids = []
+    for sid in ids:
+        res = DB.get_simulation_result(sim_id=sid)
+        times = np.unique(res.distributions_df.time)
+        dist = res.distributions_df[res.distributions_df.time == times[-1]].dist_value.values
+        if np.sum(dist)*res.params.bin_size > 1:
+            special_ids.append(sid)
+
+    ps = []
+    for sid in special_ids:
+        res = DB.get_simulation_result(sim_id=sid)
         SingleSimulationPlotter.plot_result(sim_id=sid)
+        p = {'t': res.params.t, 'r': np.round(res.params.r, decimals=2), 'e': res.params.e}
+        print(res.params.t, np.round(res.params.r, decimals=2), res.params.e)
+        ps.append(p)
+
+    df = pd.DataFrame(ps)
+    return df
+
+
 
 if __name__ == '__main__':
-    plot_heat_maps_stability()
+    plot_results()

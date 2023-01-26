@@ -18,6 +18,31 @@ class SingleSimulationPlot:
         self.plot_sum_evolution()
         self.plot_distribution_evolution()
         self.plot_parameters()
+        self.fig.update_layout(dict(updatemenus=[
+            dict(
+                type="buttons",
+                direction="left",
+                buttons=list([
+                    dict(
+                        args=["visible", "legendonly"],
+                        label="Deselect All",
+                        method="restyle"
+                    ),
+                    dict(
+                        args=["visible", True],
+                        label="Select All",
+                        method="restyle"
+                    )
+                ]),
+                pad={"r": 10, "t": 10},
+                showactive=False,
+                x=1,
+                xanchor="right",
+                y=1.1,
+                yanchor="top"
+            ),
+        ]
+        ))
         self.fig.show(renderer='browser')
 
     def plot_l2_norm_evolution(self):
