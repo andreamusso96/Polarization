@@ -51,6 +51,10 @@ class SimulationInitializer:
         return list(range(last_sim_id+1, last_sim_id+1+n_sims))
 
     @staticmethod
+    def get_methods() -> List[str]:
+        return ['RK45', 'BDF', 'LSODA']
+
+    @staticmethod
     def get_d0_parameters() -> List[DistributionParameters]:
         params = {'loc': 0, 'scale': 0.2}
         d0_params_normal = DistributionParameters(name='normal', params=params)
@@ -58,27 +62,48 @@ class SimulationInitializer:
 
     @staticmethod
     def get_other_params() -> Tuple[int, int, float, float, float]:
-        s_max = 10**3
-        n_save_distribution = 10**3
-        bound = 20.0
-        bin_size = 0.05
+        s_max = 10**2
+        n_save_distribution = 10**2
+        bound = 10.0
+        bin_size = 0.005
+        total_density_threshold = 0.8
+        return s_max, n_save_distribution, bound, bin_size, total_density_threshold
+
+    @staticmethod
+    def get_other_params_test() -> Tuple[int, int, float, float, float]:
+        s_max = 10
+        n_save_distribution = 10
+        bound = 10.0
+        bin_size = 0.1
         total_density_threshold = 0.8
         return s_max, n_save_distribution, bound, bin_size, total_density_threshold
 
     @staticmethod
     def get_ts_rs_es() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        num = 7
-        ts = np.linspace(0.1, 0.7, num=num)
-        rs = np.linspace(0.3, 1, num=num)
-        es = np.array([0.2, 0.5, 0.8]) #np.linspace(0.1, 1, num=num)
+        ts = np.linspace(0.1, 0.7, num=7)
+        rs = np.linspace(0.3, 1, num=8)
+        es = np.array([0.2, 0.5, 0.8])
         return ts, rs, es
 
     @staticmethod
-    def get_simulation_parameters_list() -> List:
-        ts, rs, es = SimulationInitializer.get_ts_rs_es()
-        s_max, n_save_distribution, bound, bin_size, total_density_threshold = SimulationInitializer.get_other_params()
+    def get_ts_rs_es_test() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        ts = np.array([0.2])
+        rs = np.array([1])
+        es = np.array([0.5])
+        return ts, rs, es
+
+    @staticmethod
+    def get_simulation_parameters_list(test: bool) -> List:
+        if test:
+            ts, rs, es = SimulationInitializer.get_ts_rs_es_test()
+            s_max, n_save_distribution, bound, bin_size, total_density_threshold = SimulationInitializer.get_other_params_test()
+        else:
+            ts, rs, es = SimulationInitializer.get_ts_rs_es()
+            s_max, n_save_distribution, bound, bin_size, total_density_threshold = SimulationInitializer.get_other_params()
+
+        methods = SimulationInitializer.get_methods()
         initial_distributions = SimulationInitializer.get_d0_parameters()
-        n_sims = len(ts)*len(rs)*len(es)*len(initial_distributions)
+        n_sims = len(ts)*len(rs)*len(es)*len(initial_distributions)*len(methods)
         sim_ids = SimulationInitializer.get_sim_ids(n_sims=n_sims)
 
         simulation_parameters = []
@@ -87,16 +112,17 @@ class SimulationInitializer:
             for r in rs:
                 for e in es:
                     for d0_params in initial_distributions:
-                        sim_id = sim_ids[c]
-                        sim_params = SimulationParameters(sim_id=sim_id, t=t, r=r, e=e, bound=bound, bin_size=bin_size, d0_parameters=d0_params, s_max=s_max, n_save_distributions=n_save_distribution, total_density_threshold=total_density_threshold)
-                        simulation_parameters.append(sim_params)
-                        c += 1
+                        for method in methods:
+                            sim_id = sim_ids[c]
+                            sim_params = SimulationParameters(sim_id=sim_id, t=t, r=r, e=e, bound=bound, bin_size=bin_size, d0_parameters=d0_params, s_max=s_max, n_save_distributions=n_save_distribution, total_density_threshold=total_density_threshold, method=method)
+                            simulation_parameters.append(sim_params)
+                            c += 1
 
         return simulation_parameters
 
     @staticmethod
-    def insert_simulation_parameters_in_db():
-        simulation_parameters_list = SimulationInitializer.get_simulation_parameters_list()
+    def insert_simulation_parameters_in_db(test: bool = False):
+        simulation_parameters_list = SimulationInitializer.get_simulation_parameters_list(test=test)
         for sim_param in simulation_parameters_list:
             DB.insert_simulation_parameters(simulation_parameters=sim_param)
 
@@ -104,4 +130,4 @@ class SimulationInitializer:
 if __name__ == '__main__':
     from Database.Tables import CreateTable
     CreateTable.create_simulation_table()
-    SimulationInitializerHighVarianceSimulations.insert_simulation_parameters_in_db()
+    SimulationInitializer.insert_simulation_parameters_in_db(test=True)

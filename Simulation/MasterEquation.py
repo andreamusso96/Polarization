@@ -2,6 +2,7 @@ from Simulation.Distribution import Distribution
 from scipy.integrate import quad, fixed_quad, solve_ivp
 from scipy.stats import rv_histogram
 import numpy as np
+from typing import Callable, List
 
 
 class MasterEquation:
@@ -12,16 +13,23 @@ class MasterEquation:
         self.d0 = d0
         setattr(MasterEquation, 'bin_size', self.d0.bin_size)
 
-    def solve(self, s_max: int, n_save_distributions: int, total_density_threshold: float):
+    def solve(self, s_max: int, n_save_distributions: int, total_density_threshold: float, method: str):
         vectorized_integral = np.vectorize(MasterEquation.integral, excluded=set('p'))
         t_eval = np.round(np.linspace(0, s_max, n_save_distributions), decimals=0)
         def fun(time, p): return MasterEquation.f(time=time, p=p, t=self.t, e=self.e, r=self.r, d0=self.d0, vectorized_integral=vectorized_integral)
-        def event(time, p): return MasterEquation.total_density_minus_threshold_event(time=time, p=p, bin_size=self.d0.bin_size, threshold=total_density_threshold)
-        event.terminal = True
-
-        res = solve_ivp(fun=fun, t_span=(0, s_max), y0=self.d0.bin_probs, t_eval=t_eval, events=event)
+        events = self.get_events(total_density_threshold=total_density_threshold, max_density_threshold=0.2)
+        # solve_ivp complains it wants an Optional but it works without a List too
+        res = solve_ivp(fun=fun, t_span=(0, s_max), y0=self.d0.bin_probs, t_eval=t_eval, events=events, method=method)
         return res
 
+    def get_events(self, total_density_threshold: float, max_density_threshold: float) -> List[Callable]:
+        def event_total_density(time, p): return MasterEquation.low_total_density_event(time=time, p=p, bin_size=self.d0.bin_size, threshold=total_density_threshold)
+        def event_max_density(time, p): return MasterEquation.low_max_density_event(time=time, p=p, threshold=max_density_threshold)
+        event_total_density.terminal = True
+        event_max_density.terminal = True
+        events = [event_total_density, event_max_density]
+
+        return events
     @staticmethod
     def integrand_simple(a: float, p: np.ndarray, x: float, e: float, r: float, d0: Distribution):
         q = rv_histogram((p, d0.bin_edges), density=True)
@@ -48,8 +56,13 @@ class MasterEquation:
         return res
 
     @staticmethod
-    def total_density_minus_threshold_event(time: float, p: np.ndarray, bin_size: float, threshold: float) -> float:
+    def low_total_density_event(time: float, p: np.ndarray, bin_size: float, threshold: float) -> float:
         total_density = np.sum(p*bin_size)
         return total_density - threshold
+
+    @staticmethod
+    def low_max_density_event(time: float, p: np.ndarray, threshold: float) -> float:
+        max_density = np.max(p)
+        return max_density - threshold
 
 

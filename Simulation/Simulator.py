@@ -41,7 +41,7 @@ class Simulator:
         self.me = MasterEquation(t=params.t, r=params.r, e=params.e, d0=params.d)
 
     def run_simulation(self) -> SimulationResult:
-        res_scipy = self.me.solve(s_max=self.params.s_max, n_save_distributions=self.params.n_save_distributions, total_density_threshold=self.params.total_density_threshold)
+        res_scipy = self.me.solve(s_max=self.params.s_max, n_save_distributions=self.params.n_save_distributions, total_density_threshold=self.params.total_density_threshold, method=self.params.method)
         sim_result = SimulationResult(params=self.params, res_scipy=res_scipy)
         return sim_result
 
@@ -56,9 +56,10 @@ if __name__ == '__main__':
     s_max = 50
     n_save_distributions = 10
     total_density_threshold = 0.7
+    method = 'LSODA'
     params = SimulationParameters(sim_id=12, t=0.2, r=1, e=0.5, bound=bound, bin_size=bin_size,
                                   d0_parameters=dist_params,
-                                  s_max=s_max, n_save_distributions=n_save_distributions, total_density_threshold=total_density_threshold)
+                                  s_max=s_max, n_save_distributions=n_save_distributions, total_density_threshold=total_density_threshold, method=method)
     s = Simulator(params=params)
     res = s.run_simulation()
     DB.insert_simulation_result(simulation_result=res)

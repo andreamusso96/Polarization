@@ -2,7 +2,7 @@ from Simulation.Distribution import DistributionGenerator, DistributionParameter
 
 
 class SimulationParameters:
-    def __init__(self, sim_id: int, t: float, r: float, e: float, bound: float, bin_size: float, d0_parameters: DistributionParameters, s_max: int, n_save_distributions: int, total_density_threshold: float):
+    def __init__(self, sim_id: int, t: float, r: float, e: float, bound: float, bin_size: float, d0_parameters: DistributionParameters, s_max: int, n_save_distributions: int, total_density_threshold: float, method: str):
         self.sim_id = sim_id
         self.t = t
         self.r = r
@@ -14,9 +14,10 @@ class SimulationParameters:
         self.s_max = s_max
         self.n_save_distributions = n_save_distributions
         self.total_density_threshold = total_density_threshold
+        self.method = method
 
     def __str__(self):
-        return f'(sim_id={self.sim_id}, t={self.t}, r={self.r}, e={self.e}, bound={self.bound}, bin_size={self.bin_size}, d0={self.d0_parameters.to_string()}, s_max={self.s_max}, n_save={self.n_save_distributions}, density_thresh={self.density_threshold})'
+        return f'(sim_id={self.sim_id}, t={self.t}, r={self.r}, e={self.e}, bound={self.bound}, bin_size={self.bin_size}, d0={self.d0_parameters.to_string()}, s_max={self.s_max}, n_save={self.n_save_distributions}, density_thresh={self.total_density_threshold}, method={self.method})'
 
     def __repr__(self):
         return self.__str__()

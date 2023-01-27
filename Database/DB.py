@@ -14,6 +14,7 @@ from SimulationAnalysis.SimulationStatistics import SimulationStatistics
 from typing import List
 import pandas as pd
 from sqlalchemy import text
+import time
 
 
 class DB:
@@ -50,13 +51,16 @@ class DB:
 
     @staticmethod
     def insert_simulation_result(simulation_result: SimulationResult):
-        with engine.begin() as conn:
-            conn.execute(text(f"PRAGMA busy_timeout = {DB.busy_timeout}"))
-            CreateTable.create_l2_norm_table(sim_id=simulation_result.params.sim_id)
-            CreateTable.create_distributions_table(simulation_result=simulation_result)
-            DBResult.insert_simulation_result(conn=conn, sim_result=simulation_result)
-            BookKeeper.set_simulation_complete_to_true(conn=conn, sim_id=simulation_result.params.sim_id)
-            BookKeeper.set_simulation_success(conn=conn, sim_id=simulation_result.params.sim_id, success=simulation_result.res_scipy.success)
+        if not DB.is_database_locked():
+            with engine.begin() as conn:
+                CreateTable.create_l2_norm_table(sim_id=simulation_result.params.sim_id)
+                CreateTable.create_distributions_table(simulation_result=simulation_result)
+                DBResult.insert_simulation_result(conn=conn, sim_result=simulation_result)
+                BookKeeper.set_simulation_complete_to_true(conn=conn, sim_id=simulation_result.params.sim_id)
+                BookKeeper.set_simulation_success(conn=conn, sim_id=simulation_result.params.sim_id, success=simulation_result.res_scipy.success)
+        else:
+            time.sleep(10)
+            DB.insert_simulation_result(simulation_result=simulation_result)
 
     # Stability Result
     @staticmethod
@@ -105,3 +109,21 @@ class DB:
     def get_heat_map_stability(x_axis: str, y_axis: str, z_val: str, f_name: str) -> pd.DataFrame:
         with engine.begin() as conn:
             return DBHeatMaps.get_heat_map_stability(conn=conn, x_axis=x_axis, y_axis=y_axis, z_val=z_val, f_name=f_name)
+    # Check if database is locked
+
+    @staticmethod
+    def is_database_locked() -> bool:
+        try:
+            with engine.connect() as conn:
+                # Try to insert a row with sim_id = -1 and see if it works, if it does not it will throw an error
+                # If the error contains the string 'database is locked' then the database is locked
+                conn.execute(text(f"PRAGMA busy_timeout = {300}"))
+                p = DBParameters.get_simulation_parameters(conn=conn, sim_id=1)
+                p.sim_id = -1
+                DBParameters.insert_parameters(conn=conn, params=p)
+                conn.rollback()
+        except Exception as e:
+            if 'database is locked' in str(e):
+                print('DB is locked')
+                return True
+        return False

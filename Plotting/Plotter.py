@@ -63,28 +63,24 @@ def get_sids_to_plot():
 
     return sids_plot
 
+
 def plot_results():
     from Database.Parameters import ParameterValue
     import numpy as np
     ids = DB.get_ids_with_parameter_value(param_value=ParameterValue(name='complete', value=True))
-    special_ids = []
-    for sid in ids:
-        res = DB.get_simulation_result(sim_id=sid)
-        times = np.unique(res.distributions_df.time)
-        dist = res.distributions_df[res.distributions_df.time == times[-1]].dist_value.values
-        if np.sum(dist)*res.params.bin_size > 1:
-            special_ids.append(sid)
-
-    ps = []
+    np_ids = np.array(ids)
+    a1 = np.array([18, 27, 31, 32, 33, 34, 52, 53, 81, 96, 109, 111, 119, 127, 128, 129, 130, 133, 135, 136, 143, 144])
+    a2temp = np_ids[np_ids < 2000]
+    a2 = a2temp[a2temp > 1000] - 1000
+    a3 = np_ids[2000 < np_ids] - 3000
+    a12 = np.intersect1d(a1, a2)
+    a13 = np.intersect1d(a1, a3)
+    a123 = np.intersect1d(a12, a3)
+    special_ids = [int(a) for a in a13]
     for sid in special_ids:
-        res = DB.get_simulation_result(sim_id=sid)
         SingleSimulationPlotter.plot_result(sim_id=sid)
-        p = {'t': res.params.t, 'r': np.round(res.params.r, decimals=2), 'e': res.params.e}
-        print(res.params.t, np.round(res.params.r, decimals=2), res.params.e)
-        ps.append(p)
-
-    df = pd.DataFrame(ps)
-    return df
+        #SingleSimulationPlotter.plot_result(sim_id=sid + 1000)
+        SingleSimulationPlotter.plot_result(sim_id=sid + 3000)
 
 
 

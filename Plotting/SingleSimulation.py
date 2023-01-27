@@ -18,7 +18,8 @@ class SingleSimulationPlot:
         self.plot_sum_evolution()
         self.plot_distribution_evolution()
         self.plot_parameters()
-        self.fig.update_layout(dict(updatemenus=[
+        self.fig.update_layout(dict(title=f'{self.result.params.sim_id}_{self.result.params.method}',
+            updatemenus=[
             dict(
                 type="buttons",
                 direction="left",

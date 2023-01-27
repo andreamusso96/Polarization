@@ -43,6 +43,7 @@ class CreateTable:
                                  Column("bound", Float),
                                  Column("bin_size", Float),
                                  Column("total_density_threshold", Float),
+                                 Column("method", String),
                                  Column("d0_parameters", String),
                                  Column("complete", Boolean),
                                  Column("success", Boolean))

@@ -32,7 +32,7 @@ class DBParameters:
         p = SimulationParameters(sim_id=row.sim_id, t=row.t, r=row.r, e=row.e, bound=row.bound, bin_size=row.bin_size,
                                  d0_parameters=DistributionParameters.from_string(row.d0_parameters), s_max=row.s_max,
                                  n_save_distributions=row.n_save_distributions,
-                                 total_density_threshold=row.total_density_threshold)
+                                 total_density_threshold=row.total_density_threshold, method=row.method)
         return p
 
     @staticmethod
@@ -42,5 +42,6 @@ class DBParameters:
                                         s_max=params.s_max, bound=params.bound, bin_size=params.bin_size,
                                         n_save_distributions=params.n_save_distributions,
                                         total_density_threshold=params.total_density_threshold,
+                                        method=params.method,
                                         d0_parameters=params.d0_parameters.to_string(), complete=False, success=False)
         conn.execute(stmt)
