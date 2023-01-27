@@ -8,6 +8,6 @@ if "cluster" in CODE_PATH:
 if is_cluster:
     absolute_path_to_db = '/cluster/scratch/anmusso/PolarizationDB/cluster_sim_db_v1.db'
 else:
-    absolute_path_to_db = '/Users/anmusso/Desktop/PhD/Polarization/DB/sim_db_v1.db'
+    absolute_path_to_db = '/Users/anmusso/Desktop/PhD/Polarization/DB/cluster_sim_db_v1.db'
 
 DB_URL = f'sqlite:////{absolute_path_to_db}'

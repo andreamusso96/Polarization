@@ -82,7 +82,10 @@ def plot_results():
         #SingleSimulationPlotter.plot_result(sim_id=sid + 1000)
         SingleSimulationPlotter.plot_result(sim_id=sid + 3000)
 
-
+def plot_test():
+    ids = [1,2, 3]
+    for sid in ids:
+        SingleSimulationPlotter.plot_result(sim_id=sid)
 
 if __name__ == '__main__':
-    plot_results()
+    plot_test()
