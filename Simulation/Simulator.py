@@ -1,7 +1,8 @@
 from Simulation.MasterEquation import MasterEquation
 from Simulation.Parameters import SimulationParameters
-from Simulation.Distribution import Distribution
+from Simulation.Distribution import Distribution, DistributionGenerator
 from Simulation.SimulationResult import SimulationResult
+from Database.DB import DB
 import pandas as pd
 import numpy as np
 
@@ -62,9 +63,7 @@ class Simulator:
 
 
 if __name__ == '__main__':
-    from Simulation.Distribution import DistributionGenerator, DistributionParameters
-    from Database.DB import DB
-
+    from Simulation.Parameters import DistributionParameters
     bound = 10
     bin_size = 0.1
     dist_params = DistributionParameters(name='normal', params={'loc': 0, 'scale': 0.2})
