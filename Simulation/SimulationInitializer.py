@@ -104,4 +104,4 @@ class SimulationInitializer:
 if __name__ == '__main__':
     from Database.Tables import CreateTable
     CreateTable.create_simulation_table()
-    SimulationInitializer.insert_simulation_parameters_in_db(test=True)
+    SimulationInitializer.insert_simulation_parameters_in_db(test=False)
