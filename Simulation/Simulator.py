@@ -22,7 +22,7 @@ class Simulator:
             current_d = self.get_current_d(res_scipy=res_scipy)
 
     def solve_block(self, current_t: int, current_d: Distribution):
-        me = MasterEquation(t=params.t, r=params.r, e=params.e, d0=current_d)
+        me = MasterEquation(t=self.params.t, r=self.params.r, e=self.params.e, d0=current_d)
         time_steps_save_distribution_block = self.get_time_steps_save_distributions_block(current_t=current_t)
         res_scipy = me.solve(time_span=current_t + self.params.block_time_span,
                              time_steps_save=time_steps_save_distribution_block,
@@ -73,11 +73,11 @@ if __name__ == '__main__':
     block_time_span = 5
     total_density_threshold = 0.8
     method = 'DOP853'
-    params = SimulationParameters(sim_id=1, t=0.2, r=1, e=0.5, bound=bound, bin_size=bin_size,
+    p = SimulationParameters(sim_id=1, t=0.2, r=1, e=0.5, bound=bound, bin_size=bin_size,
                                   d0_parameters=dist_params,
                                   total_time_span=total_time_span, n_save_distributions_block=n_save_distributions_block,
                                   block_time_span=block_time_span,
                                   total_density_threshold=total_density_threshold, method=method)
-    s = Simulator(params=params)
+    s = Simulator(params=p)
     res = s.run_simulation()
 
