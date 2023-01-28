@@ -1,19 +1,17 @@
 from Database.Tables import GetTable
+from Database.Result import DBResult
 from SimulationAnalysis.SimulationStatistics import SimulationStatistics
-from sqlalchemy import insert, select
+from sqlalchemy import insert
 from sqlalchemy.engine import Connection
 
 
 class DBStatistics:
     @staticmethod
     def get_simulation_statistics(conn: Connection, sim_id: int) -> SimulationStatistics:
-        l2_norm_table = GetTable.get_l2_norm_table(sim_id=sim_id)
-        stmt_l2_norm_end = select(l2_norm_table.c.l2_norm).order_by(l2_norm_table.c.time.desc())
-        l2_norm_end = conn.execute(stmt_l2_norm_end).scalars().first()
-
-        stmt_l2_norm_beginning = select(l2_norm_table.c.l2_norm).order_by(l2_norm_table.c.time.asc())
-        l2_norm_beginning = conn.execute(stmt_l2_norm_beginning).scalars().first()
-
+        result = DBResult.get_simulation_result(conn=conn, sim_id=sim_id)
+        l2_norm_df = result.get_l2_norm_df()
+        l2_norm_beginning = l2_norm_df.iloc[0]['l2_norm']
+        l2_norm_end = l2_norm_df.iloc[-1]['l2_norm']
         sim_stats = SimulationStatistics(sim_id=sim_id, l2_norm_end=l2_norm_end,
                                          l2_norm_diff=l2_norm_beginning - l2_norm_end)
 

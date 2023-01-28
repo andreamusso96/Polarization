@@ -30,8 +30,9 @@ class DBParameters:
     @staticmethod
     def _sim_table_row_to_parameters(row) -> SimulationParameters:
         p = SimulationParameters(sim_id=row.sim_id, t=row.t, r=row.r, e=row.e, bound=row.bound, bin_size=row.bin_size,
-                                 d0_parameters=DistributionParameters.from_string(row.d0_parameters), s_max=row.s_max,
-                                 n_save_distributions=row.n_save_distributions,
+                                 d0_parameters=DistributionParameters.from_string(row.d0_parameters), total_time_span=row.total_time_span,
+                                 block_time_span=row.block_time_span,
+                                 n_save_distributions_block=row.n_save_distributions_blocl,
                                  total_density_threshold=row.total_density_threshold, method=row.method)
         return p
 
@@ -39,8 +40,10 @@ class DBParameters:
     def insert_parameters(conn: Connection, params: SimulationParameters):
         sim_table = GetTable.get_simulation_table()
         stmt = insert(sim_table).values(sim_id=params.sim_id, t=params.t, r=params.r, e=params.e,
-                                        s_max=params.s_max, bound=params.bound, bin_size=params.bin_size,
-                                        n_save_distributions=params.n_save_distributions,
+                                        total_time_span=params.total_time_span,
+                                        block_time_span=params.block_time_span,
+                                        n_save_distributions_block=params.n_save_distributions_block,
+                                        bound=params.bound, bin_size=params.bin_size,
                                         total_density_threshold=params.total_density_threshold,
                                         method=params.method,
                                         d0_parameters=params.d0_parameters.to_string(), complete=False, success=False)

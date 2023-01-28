@@ -1,4 +1,3 @@
-from Simulation.Simulator import SimulationResult
 from Database.Engine import engine, metadata_obj
 from sqlalchemy import Column, Table, Float, Integer, String, Boolean
 
@@ -20,11 +19,6 @@ class GetTable:
         return stability_table
 
     @staticmethod
-    def get_l2_norm_table(sim_id: int):
-        l2_norm = Table(f"l2_norm_{sim_id}", metadata_obj, autoload_with=engine)
-        return l2_norm
-
-    @staticmethod
     def get_distributions_table(sim_id: int):
         distributions = Table(f"distributions_{sim_id}", metadata_obj, autoload_with=engine)
         return distributions
@@ -38,8 +32,9 @@ class CreateTable:
                                  Column("t", Float),
                                  Column("r", Float),
                                  Column("e", Float),
-                                 Column("s_max", Integer),
-                                 Column("n_save_distributions", Integer),
+                                 Column("total_time_span", Integer),
+                                 Column("block_time_span", Integer),
+                                 Column("n_save_distributions_block", Integer),
                                  Column("bound", Float),
                                  Column("bin_size", Float),
                                  Column("total_density_threshold", Float),
@@ -74,17 +69,8 @@ class CreateTable:
         return stability_table
 
     @staticmethod
-    def create_l2_norm_table(sim_id: int) -> Table:
-        l2_norm_table = Table(f"l2_norm_{sim_id}",
-                              metadata_obj,
-                              Column("time", Integer, primary_key=True),
-                              Column("l2_norm", Float))
-        metadata_obj.create_all(bind=engine, tables=[l2_norm_table])
-        return l2_norm_table
-
-    @staticmethod
-    def create_distributions_table(simulation_result: SimulationResult) -> Table:
-        distributions_table = Table(f"distributions_{simulation_result.params.sim_id}",
+    def create_distributions_table(sim_id: int) -> Table:
+        distributions_table = Table(f"distributions_{sim_id}",
                                     metadata_obj,
                                     Column("index", Integer, primary_key=True),
                                     Column("time", Integer),

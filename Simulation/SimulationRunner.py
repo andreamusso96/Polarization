@@ -2,7 +2,6 @@ from config import is_cluster
 from Database.DB import DB, ParameterValue
 import os
 import time
-from typing import List
 
 
 class SimulationRunner:

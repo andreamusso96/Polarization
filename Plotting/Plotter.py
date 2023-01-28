@@ -83,7 +83,8 @@ def plot_results():
         SingleSimulationPlotter.plot_result(sim_id=sid + 3000)
 
 def plot_test():
-    ids = [1,2, 3]
+    from Database.Parameters import ParameterValue
+    ids = DB.get_ids_with_parameter_value(param_value=ParameterValue(name='complete', value=True))
     for sid in ids:
         SingleSimulationPlotter.plot_result(sim_id=sid)
 

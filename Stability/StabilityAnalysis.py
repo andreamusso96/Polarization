@@ -20,8 +20,8 @@ class StabilityAnalysis:
         self.e = e
         self.eigenvalue_calculator = EigenvalueCalculator(t=self.t, r=self.r, e=self.e)
 
-    def get_stability_analysis(self, max_frequency):
-        eigs = self.get_eigs(max_frequency=max_frequency)
+    def get_stability_analysis(self, max_frequency: int, diam: float) -> StabilityResult:
+        eigs = self.get_eigs(max_frequency=max_frequency, diam=diam)
         max_eig = np.max(eigs)
         stable = self.is_stable(max_eig=max_eig)
         max_eigs_far_from_max_frequency = self.max_eigs_far_from_max_frequency(eigs=eigs)
@@ -29,11 +29,11 @@ class StabilityAnalysis:
                                max_frequency=max_frequency,
                                max_eigs_far_from_max_frequency=max_eigs_far_from_max_frequency)
 
-    def get_eigs(self, max_frequency: int) -> np.ndarray:
+    def get_eigs(self, max_frequency: int, diam: float) -> np.ndarray:
         ks = range(0, max_frequency)
         eigs = []
         for k in ks:
-            eig = self.eigenvalue_calculator.get_eigenvalue(k=k)
+            eig = self.eigenvalue_calculator.get_eigenvalue2(k=k, diam=diam)
             eigs.append(eig)
 
         return np.array(eigs)

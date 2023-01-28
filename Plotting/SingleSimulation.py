@@ -1,4 +1,4 @@
-from Database.DB import Result
+from Simulation.SimulationResult import SimulationResult
 import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
@@ -6,7 +6,7 @@ from plotly.express.colors import sample_colorscale
 
 
 class SingleSimulationPlot:
-    def __init__(self, result: Result):
+    def __init__(self, result: SimulationResult):
         self.result = result
         self.n_cols = 3
         self.n_rows = 1
@@ -48,7 +48,8 @@ class SingleSimulationPlot:
 
     def plot_l2_norm_evolution(self):
         row, col = 1, 1
-        trace = go.Scatter(x=self.result.l2_norm_df.time, y=self.result.l2_norm_df.l2_norm, mode='lines')
+        l2_norm_df = self.result.get_l2_norm_df()
+        trace = go.Scatter(x=l2_norm_df.time, y=l2_norm_df.l2_norm, mode='lines')
         self.fig.add_trace(trace, row=row, col=col)
         self.fig.update_xaxes(title_text='time', row=row, col=col)
         self.fig.update_yaxes(title_text='value', row=row, col=col)

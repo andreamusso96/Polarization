@@ -13,13 +13,12 @@ class MasterEquation:
         self.d0 = d0
         setattr(MasterEquation, 'bin_size', self.d0.bin_size)
 
-    def solve(self, s_max: int, n_save_distributions: int, total_density_threshold: float, method: str):
+    def solve(self, time_span: int, time_steps_save: int, total_density_threshold: float, method: str):
         vectorized_integral = np.vectorize(MasterEquation.integral, excluded=set('p'))
-        t_eval = np.round(np.linspace(0, s_max, n_save_distributions), decimals=0)
         def fun(time, p): return MasterEquation.f(time=time, p=p, t=self.t, e=self.e, r=self.r, d0=self.d0, vectorized_integral=vectorized_integral)
         events = self.get_events(total_density_threshold=total_density_threshold, max_density_threshold=0.2)
-        # solve_ivp complains it wants an Optional but it works without a List too
-        res = solve_ivp(fun=fun, t_span=(0, s_max), y0=self.d0.bin_probs, t_eval=t_eval, events=events, method=method)
+        # solve_ivp complains it wants an Optional, but it works without a List too
+        res = solve_ivp(fun=fun, t_span=(0, time_span), y0=self.d0.bin_probs, t_eval=time_steps_save, events=events, method=method)
         return res
 
     def get_events(self, total_density_threshold: float, max_density_threshold: float) -> List[Callable]:
@@ -30,6 +29,7 @@ class MasterEquation:
         events = [event_total_density, event_max_density]
 
         return events
+
     @staticmethod
     def integrand_simple(a: float, p: np.ndarray, x: float, e: float, r: float, d0: Distribution):
         q = rv_histogram((p, d0.bin_edges), density=True)

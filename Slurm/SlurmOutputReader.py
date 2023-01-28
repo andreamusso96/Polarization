@@ -77,8 +77,9 @@ class SlurmOutputReader:
 
 
 class SimulationOutputAnalyser:
-    def __init__(self):
+    def __init__(self, min_job_id: int):
         self.folder_path = CODE_PATH + '/Slurm/SlurmOutput/'
+        self.min_job_id = min_job_id
         self.file_names = self.get_slurm_file_names()
 
     def get_termination_reasons(self) -> pd.DataFrame:
@@ -94,7 +95,9 @@ class SimulationOutputAnalyser:
         slurm_file_names = []
         for file_name in all_file_names:
             if 'slurm' in file_name:
-                slurm_file_names.append(file_name)
+                job_id = int(file_name.split('-')[-1].replace('.out', ''))
+                if job_id >= self.min_job_id:
+                    slurm_file_names.append(file_name)
         return slurm_file_names
 
     def print_termination_reasons(self):
@@ -104,6 +107,6 @@ class SimulationOutputAnalyser:
 
 
 if __name__ == '__main__':
-    analyser = SimulationOutputAnalyser()
+    analyser = SimulationOutputAnalyser(min_job_id=7756509)
     t = analyser.get_termination_reasons()
     print(t.head())

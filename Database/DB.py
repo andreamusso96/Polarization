@@ -1,36 +1,39 @@
 from Database.Engine import engine
 from Database.Parameters import DBParameters, ParameterValue, ParameterRange
 from Database.SimIds import DBSimId
-from Database.Tables import CreateTable
 from Database.SimulationStatistics import DBStatistics
-from Database.Result import DBResult, Result
+from Database.Result import DBResult
 from Database.SimulationBookKeeping import BookKeeper
 from Database.HeatMaps import DBHeatMaps
 from Database.ResultStability import DBStability
 from Simulation.Parameters import SimulationParameters
-from Simulation.Simulator import SimulationResult
+from Simulation.SimulationResult import SimulationResult
 from Stability.StabilityAnalysis import StabilityResult
 from SimulationAnalysis.SimulationStatistics import SimulationStatistics
 from typing import List
 import pandas as pd
 from sqlalchemy import text
-import time
 
 
 class DB:
     busy_timeout = 120*1000  # Time before sqlalchemy throws timeout error in milliseconds
+    # Bookkeeping
+
+    @staticmethod
+    def setup_database_for_simulation(params: SimulationParameters):
+        with engine.begin() as conn:
+            BookKeeper.set_up_database_for_simulation(conn=conn, params=params)
+
+    @staticmethod
+    def set_flags_simulation_complete(sim_id: int, success: bool):
+        with engine.begin() as conn:
+            BookKeeper.set_flags_simulation_complete(conn=conn, sim_id=sim_id, success=success)
 
     # SimulationParameters
     @staticmethod
     def get_simulation_parameters(sim_id: int) -> SimulationParameters:
         with engine.begin() as conn:
             return DBParameters.get_simulation_parameters(conn=conn, sim_id=sim_id)
-
-    @staticmethod
-    def insert_simulation_parameters(simulation_parameters: SimulationParameters):
-        with engine.begin() as conn:
-            conn.execute(text(f"PRAGMA busy_timeout = {DB.busy_timeout}"))
-            DBParameters.insert_parameters(conn=conn, params=simulation_parameters)
 
     # Simulation statistics
     @staticmethod
@@ -45,22 +48,15 @@ class DB:
 
     # Simulation Results
     @staticmethod
-    def get_simulation_result(sim_id: int) -> Result:
+    def get_simulation_result(sim_id: int) -> SimulationResult:
         with engine.begin() as conn:
             return DBResult.get_simulation_result(conn=conn, sim_id=sim_id)
 
     @staticmethod
-    def insert_simulation_result(simulation_result: SimulationResult):
-        if not DB.is_database_locked():
-            with engine.begin() as conn:
-                CreateTable.create_l2_norm_table(sim_id=simulation_result.params.sim_id)
-                CreateTable.create_distributions_table(simulation_result=simulation_result)
-                DBResult.insert_simulation_result(conn=conn, sim_result=simulation_result)
-                BookKeeper.set_simulation_complete_to_true(conn=conn, sim_id=simulation_result.params.sim_id)
-                BookKeeper.set_simulation_success(conn=conn, sim_id=simulation_result.params.sim_id, success=simulation_result.res_scipy.success)
-        else:
-            time.sleep(10)
-            DB.insert_simulation_result(simulation_result=simulation_result)
+    def insert_simulation_result_in_distribution_table(simulation_result: SimulationResult):
+        with engine.begin() as conn:
+            conn.execute(text(f"PRAGMA busy_timeout = {DB.busy_timeout}"))
+            DBResult.insert_result_in_distribution_table(conn=conn, simulation_result=simulation_result)
 
     # Stability Result
     @staticmethod
