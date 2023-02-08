@@ -1,5 +1,7 @@
 from Database.Tables import GetTable
+from Database.Parameters import ParameterValue
 from Stability.StabilityAnalysis import StabilityResult
+from Database.SimIds import DBSimId
 from sqlalchemy import insert, select
 from sqlalchemy.engine import Connection
 from typing import List
@@ -16,19 +18,19 @@ class DBStability:
         conn.execute(stmt)
 
     @staticmethod
-    def get_stability_result(conn: Connection, t: float, r: float, e: float) -> StabilityResult:
+    def get_stability_results(conn: Connection, param_values: List[ParameterValue] = None) -> List[StabilityResult]:
         stability_table = GetTable.get_stability_stable()
-        stmt = select(stability_table).where(stability_table.c.t == t).where(stability_table.c.r == r).where(
-            stability_table.c.e == e)
-        res = conn.execute(stmt).all()[0]
-        stability_result = DBStability._stability_table_row_to_stability_result(row=res)
-        return stability_result
+        if param_values is None:
+            stmt = select(stability_table)
+        else:
+            stmts = []
+            for param_value in param_values:
+                stmt = select(stability_table).where(getattr(stability_table.c, param_value.name) == param_value.value)
+                stmts.append(stmt)
+            stmt = DBSimId._set_operations_on_statements(stmts=stmts, method='intersection')
 
-    @staticmethod
-    def get_all_stability_results(conn: Connection) -> List[StabilityResult]:
-        stability_table = GetTable.get_stability_stable()
-        stmt = select(stability_table)
         res = conn.execute(stmt).all()
+
         stability_results = []
         for row in res:
             stability_result = DBStability._stability_table_row_to_stability_result(row=row)

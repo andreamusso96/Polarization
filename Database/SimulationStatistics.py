@@ -1,21 +1,18 @@
 from Database.Tables import GetTable
-from Database.Result import DBResult
 from SimulationAnalysis.SimulationStatistics import SimulationStatistics
-from sqlalchemy import insert
+from sqlalchemy import insert, select
 from sqlalchemy.engine import Connection
+from typing import List
+import pandas as pd
 
 
 class DBStatistics:
     @staticmethod
-    def get_simulation_statistics(conn: Connection, sim_id: int) -> SimulationStatistics:
-        result = DBResult.get_simulation_result(conn=conn, sim_id=sim_id)
-        l2_norm_df = result.get_l2_norm_df()
-        l2_norm_beginning = l2_norm_df.iloc[0]['l2_norm']
-        l2_norm_end = l2_norm_df.iloc[-1]['l2_norm']
-        sim_stats = SimulationStatistics(sim_id=sim_id, l2_norm_end=l2_norm_end,
-                                         l2_norm_diff=l2_norm_beginning - l2_norm_end)
-
-        return sim_stats
+    def get_simulation_statistics(conn: Connection, sim_ids: List[int]) -> pd.DataFrame:
+        sim_statistics_table = GetTable.get_simulation_statistics_table()
+        stmt = select(sim_statistics_table).where(sim_statistics_table.c.sim_id.in_(sim_ids))
+        df = pd.read_sql(sql=stmt, con=conn)
+        return df
 
     @staticmethod
     def insert_simulation_statistics(conn: Connection, simulation_statistics: SimulationStatistics):

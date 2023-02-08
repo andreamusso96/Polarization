@@ -16,7 +16,7 @@ class SimulationInitializer:
     @staticmethod
     def get_sim_ids(n_sims: int) -> List[int]:
         try:
-            last_sim_id = DB.get_last_sim_id()
+            last_sim_id = sorted(DB.get_sim_ids())[-1]
         except IndexError as e:
             last_sim_id = 0
 
@@ -34,11 +34,11 @@ class SimulationInitializer:
 
     @staticmethod
     def get_other_params() -> Tuple[int, int, int, float, float, float]:
-        total_time_span = 10**2
+        total_time_span = 10**3
         block_time_span = 10
         n_save_distribution_block = 10
-        bound = 10.0
-        bin_size = 0.01
+        bound = 5
+        bin_size = 0.005
         total_density_threshold = 0.8
         return total_time_span, n_save_distribution_block, block_time_span, bound, bin_size, total_density_threshold
 
@@ -47,8 +47,8 @@ class SimulationInitializer:
         total_time_span = 10
         block_time_span = 5
         n_save_distribution_block = 5
-        bound = 10.0
-        bin_size = 0.1
+        bound = 5
+        bin_size = 0.01
         total_density_threshold = 0.8
         return total_time_span, block_time_span, n_save_distribution_block, bound, bin_size, total_density_threshold
 
@@ -61,9 +61,9 @@ class SimulationInitializer:
 
     @staticmethod
     def get_ts_rs_es_test() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        ts = np.array([0.2])
+        ts = np.array([0.3])
         rs = np.array([1])
-        es = np.array([0.5])
+        es = np.array([0.1])
         return ts, rs, es
 
     @staticmethod
@@ -104,4 +104,4 @@ class SimulationInitializer:
 if __name__ == '__main__':
     from Database.Tables import CreateTable
     CreateTable.create_simulation_table()
-    SimulationInitializer.insert_simulation_parameters_in_db(test=False)
+    SimulationInitializer.insert_simulation_parameters_in_db(test=True)

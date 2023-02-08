@@ -36,7 +36,8 @@ class ComputeSimulationStatistics:
 
 
 if __name__ == '__main__':
-    from Database.Parameters import ParameterValue
-    ids = DB.get_ids_with_parameter_value(param_value=ParameterValue(name='complete', value=True))
+    from Database.Tables import CreateTable
+    ids = DB.get_sim_ids()
+    CreateTable.create_simulation_statistics_table()
     for sim_id in ids:
         ComputeSimulationStatistics.compute_and_save_simulation_statistics(sim_id=sim_id)

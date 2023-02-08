@@ -30,7 +30,7 @@ class StabilityAnalysis:
                                max_eigs_far_from_max_frequency=max_eigs_far_from_max_frequency)
 
     def get_eigs(self, max_frequency: int, diam: float) -> np.ndarray:
-        ks = range(0, max_frequency)
+        ks = range(1, max_frequency)
         eigs = []
         for k in ks:
             eig = self.eigenvalue_calculator.get_eigenvalue2(k=k, diam=diam)

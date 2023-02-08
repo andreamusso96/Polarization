@@ -1,52 +1,55 @@
 from Database.Tables import GetTable
 from Database.Parameters import ParameterRange, ParameterValue
-from sqlalchemy import select, union, intersect
+from sqlalchemy import select, union, intersect, Table
 from sqlalchemy.engine import Connection
 from typing import List
 
 
 class DBSimId:
     @staticmethod
-    def get_all_sim_ids(conn: Connection) -> List[int]:
+    def get_sim_ids(conn: Connection, param_ranges: List[ParameterRange] = None, param_values: List[ParameterValue] = None, method: str = 'intersection') -> List[int]:
         sim_table = GetTable.get_simulation_table()
-        stmt = select(sim_table.c.sim_id)
-        res = conn.execute(stmt).scalars().all()
-        return res
+        if param_ranges is None and param_values is None:
+            stmt = select(sim_table.c.sim_id)
+        elif param_ranges is None and param_values is not None:
+            stmt = DBSimId._set_operations_on_statements(stmts=DBSimId._get_stmts_for_parameter_values(sim_table=sim_table,param_values=param_values), method=method)
+        elif param_ranges is not None and param_values is None:
+            stmt = DBSimId._set_operations_on_statements(stmts=DBSimId._get_stmts_for_parameter_ranges(sim_table=sim_table, param_ranges=param_ranges), method=method)
+        else:
+            stmts_param_ranges = DBSimId._get_stmts_for_parameter_ranges(param_ranges=param_ranges)
+            stmts_param_values = DBSimId._get_stmts_for_parameter_values(param_values=param_values)
+            stmt = DBSimId._set_operations_on_statements(stmts=stmts_param_ranges + stmts_param_values, method=method)
+
+        ids = conn.execute(stmt).scalars().all()
+        return ids
 
     @staticmethod
-    def get_last_sim_id(conn: Connection) -> int:
-        sim_table = GetTable.get_simulation_table()
-        stmt = select(sim_table.c.sim_id)
-        res = conn.execute(stmt).scalars().all()
-        last_sim_id = sorted(res)[-1]
-        return last_sim_id
-
-    @staticmethod
-    def get_ids_with_parameter_value(conn: Connection, param_value: ParameterValue) -> List[int]:
-        sim_table = GetTable.get_simulation_table()
-        stmt = select(sim_table.c.sim_id).where(getattr(sim_table.c, param_value.name) == param_value.value)
-        sim_ids = conn.execute(stmt).scalars().all()
-        return sim_ids
-
-    @staticmethod
-    def get_ids_in_parameter_ranges(conn: Connection, param_ranges: List[ParameterRange], method: str) -> List[int]:
-        sim_table = GetTable.get_simulation_table()
-        select_stmts = []
+    def _get_stmts_for_parameter_ranges(sim_table: Table, param_ranges: List[ParameterRange]) -> List[select]:
+        stmts = []
         for r in param_ranges:
             stmt = select(sim_table.c.sim_id).where(getattr(sim_table.c, r.name) >= r.min_val).where(
                 getattr(sim_table.c, r.name) < r.max_val)
-            select_stmts.append(stmt)
+            stmts.append(stmt)
+        return stmts
 
+    @staticmethod
+    def _get_stmts_for_parameter_values(sim_table: Table, param_values: List[ParameterValue]) -> List[select]:
+        stmts = []
+        for v in param_values:
+            stmt = select(sim_table.c.sim_id).where(getattr(sim_table.c, v.name) == v.value)
+            stmts.append(stmt)
+        return stmts
+
+    @staticmethod
+    def _set_operations_on_statements(stmts: List[select], method: str) -> select:
         if method == 'intersection':
-            stmt = intersect(*select_stmts)
+            stmt = intersect(*stmts)
         elif method == 'union':
-            stmt = union(*select_stmts)
+            stmt = union(*stmts)
         else:
             class InvalidMethod(Exception):
                 def __init__(self, message):
                     super().__init__(message)
 
             raise InvalidMethod(f"The method provided {method} is not valid")
-
-        sim_ids = conn.execute(stmt).scalars().all()
-        return sim_ids
+        return stmt

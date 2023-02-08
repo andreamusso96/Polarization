@@ -17,8 +17,8 @@ from sqlalchemy import text
 
 class DB:
     busy_timeout = 120*1000  # Time before sqlalchemy throws timeout error in milliseconds
-    # Bookkeeping
 
+    # Bookkeeping
     @staticmethod
     def setup_database_for_simulation(params: SimulationParameters):
         with engine.begin() as conn:
@@ -37,12 +37,12 @@ class DB:
 
     # Simulation statistics
     @staticmethod
-    def get_simulation_statistics(sim_id: int):
+    def get_simulation_statistics(sim_ids: List[int]) -> pd.DataFrame:
         with engine.begin() as conn:
-            return DBStatistics.get_simulation_statistics(conn=conn, sim_id=sim_id)
+            return DBStatistics.get_simulation_statistics(conn=conn, sim_ids=sim_ids)
 
     @staticmethod
-    def insert_simulation_statistics(simulation_statistics: SimulationStatistics):
+    def insert_simulation_statistics(simulation_statistics: SimulationStatistics) -> None:
         with engine.begin() as conn:
             DBStatistics.insert_simulation_statistics(conn=conn, simulation_statistics=simulation_statistics)
 
@@ -53,21 +53,16 @@ class DB:
             return DBResult.get_simulation_result(conn=conn, sim_id=sim_id)
 
     @staticmethod
-    def insert_simulation_result_in_distribution_table(simulation_result: SimulationResult):
+    def insert_simulation_result_in_distribution_table(simulation_result: SimulationResult) -> None:
         with engine.begin() as conn:
             conn.execute(text(f"PRAGMA busy_timeout = {DB.busy_timeout}"))
             DBResult.insert_result_in_distribution_table(conn=conn, simulation_result=simulation_result)
 
     # Stability Result
     @staticmethod
-    def get_stability_result(t: float, r: float, e: float) -> StabilityResult:
+    def get_stability_results(param_values: List[ParameterValue] = None) -> List[StabilityResult]:
         with engine.begin() as conn:
-            return DBStability.get_stability_result(conn=conn, t=t, r=r, e=e)
-
-    @staticmethod
-    def get_all_stability_results() -> List[StabilityResult]:
-        with engine.begin() as conn:
-            return DBStability.get_all_stability_results(conn=conn)
+            return DBStability.get_stability_results(conn=conn, param_values=param_values)
 
     @staticmethod
     def insert_stability_result(stability_result: StabilityResult) -> None:
@@ -76,24 +71,9 @@ class DB:
 
     # SimID
     @staticmethod
-    def get_all_sim_ids() -> List[int]:
+    def get_sim_ids(param_ranges: List[ParameterRange] = None, param_values: List[ParameterValue] = None, method: str = 'intersection') -> List[int]:
         with engine.begin() as conn:
-            return DBSimId.get_all_sim_ids(conn=conn)
-
-    @staticmethod
-    def get_last_sim_id() -> int:
-        with engine.begin() as conn:
-            return DBSimId.get_last_sim_id(conn=conn)
-
-    @staticmethod
-    def get_ids_with_parameter_value(param_value: ParameterValue) -> List[int]:
-        with engine.begin() as conn:
-            return DBSimId.get_ids_with_parameter_value(conn=conn, param_value=param_value)
-
-    @staticmethod
-    def get_ids_in_parameter_ranges(param_ranges: List[ParameterRange], method: str) -> List[int]:
-        with engine.begin() as conn:
-            return DBSimId.get_ids_in_parameter_ranges(conn=conn, param_ranges=param_ranges, method=method)
+            return DBSimId.get_sim_ids(conn=conn, param_ranges=param_ranges, param_values=param_values, method=method)
 
     # Heat maps
     @staticmethod

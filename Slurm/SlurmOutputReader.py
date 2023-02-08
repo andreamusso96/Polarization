@@ -107,6 +107,6 @@ class SimulationOutputAnalyser:
 
 
 if __name__ == '__main__':
-    analyser = SimulationOutputAnalyser(min_job_id=7756509)
+    analyser = SimulationOutputAnalyser(min_job_id=7800000)
     t = analyser.get_termination_reasons()
     print(t.head())

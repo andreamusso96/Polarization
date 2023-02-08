@@ -2,6 +2,12 @@ from Database.Engine import engine, metadata_obj
 from sqlalchemy import Column, Table, Float, Integer, String, Boolean
 
 
+class TableNames:
+    sim_table = "sim_table"
+    sim_statistics = "sim_statistics"
+    stability = "stability"
+
+
 class GetTable:
     @staticmethod
     def get_simulation_table() -> Table:
@@ -9,19 +15,24 @@ class GetTable:
         return sim_table
 
     @staticmethod
-    def get_simulation_statistics_table():
+    def get_simulation_statistics_table() -> Table:
         sim_stats = Table("sim_statistics", metadata_obj, autoload_with=engine)
         return sim_stats
 
     @staticmethod
-    def get_stability_stable():
+    def get_stability_stable() -> Table:
         stability_table = Table("stability", metadata_obj, autoload_with=engine)
         return stability_table
 
     @staticmethod
-    def get_distributions_table(sim_id: int):
+    def get_distributions_table(sim_id: int) -> Table:
         distributions = Table(f"distributions_{sim_id}", metadata_obj, autoload_with=engine)
         return distributions
+
+    @staticmethod
+    def get_table(table_name: str) -> Table:
+        table = Table(table_name, metadata_obj, autoload_with=engine)
+        return table
 
 
 class CreateTable:

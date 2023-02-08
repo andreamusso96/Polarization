@@ -1,8 +1,17 @@
 from Simulation.SimulationResult import SimulationResult
+from Database.DB import DB
 import numpy as np
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 from plotly.express.colors import sample_colorscale
+
+
+class SingleSimulationPlotter:
+    @staticmethod
+    def plot_result(sim_id: int):
+        result = DB.get_simulation_result(sim_id=sim_id)
+        plot = SingleSimulationPlot(result=result)
+        plot.plot_simulation()
 
 
 class SingleSimulationPlot:
@@ -61,7 +70,7 @@ class SingleSimulationPlot:
         self.fig.add_trace(trace, row=row, col=col)
 
     def plot_distribution_evolution(self):
-        times = range(len(self.sums)) #np.unique(self.result.distributions_df.time.values)
+        times = np.unique(self.result.distributions_df.time.values)
         x = np.linspace(0, 1, len(times))
         colors = sample_colorscale('jet', list(x))
         row, col = 1, 2
@@ -85,7 +94,6 @@ class SingleSimulationPlot:
         for i, t in enumerate(times):
             df_plot = self.result.distributions_df[self.result.distributions_df.time == t]
             sum_t = np.sum(df_plot.dist_value*self.result.params.bin_size)
-            if np.abs(sum_t) < 2 and np.abs(sum_t) > 0.7:
-                sums.append(sum_t)
+            sums.append(sum_t)
 
         return np.array(sums)

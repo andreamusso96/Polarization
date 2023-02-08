@@ -9,10 +9,10 @@ class StabilityAnalysisRunner:
     def get_parameters_stability_analysis() -> Tuple[np.ndarray, np.ndarray, np.ndarray, int, float]:
         num = 10
         ts = np.linspace(0.1, 1, num=num)
-        rs = np.array([1]) # np.linspace(0.1, 1, num=num)
+        rs = np.array([0.8]) # np.linspace(0.1, 1, num=num)
         es = np.linspace(0.1, 1, num=num)
         max_frequency = 1000
-        diam = 10
+        diam = 1
         return ts, rs, es, max_frequency, diam
 
     @staticmethod
@@ -41,11 +41,11 @@ def plot_stability():
     results = StabilityAnalysisRunner.run_stability_analysis()
     ds = []
     for result in results:
-        d = {'t': result.t, 'e': result.e, 'max_eig': result.max_eig}
+        d = {'t': result.t, 'e': result.e, 'stable': int(result.stable)}
         ds.append(d)
 
     df = pd.DataFrame(ds)
-    df = df.pivot(index='t', columns='e', values='max_eig')
+    df = df.pivot(index='t', columns='e', values='stable')
 
     fig = go.Figure()
     trace = go.Heatmap(z=df.values, x=df.columns, y=df.index)

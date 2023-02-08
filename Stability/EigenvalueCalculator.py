@@ -7,26 +7,7 @@ class EigenvalueCalculator:
         self.r = r
         self.e = e
 
-    def get_eigenvalue(self, k: int):
-        # Variable definition
-        c = np.log(2)/(self.r*self.e)
-        c2 = c**2
-        eps = self.r*self.t
-        v = (self.r - 1)/self.r
-        w = (self.r + 1)/self.r
-        kv = k*v
-        kv2 = kv**2
-        kw = k*w
-        kw2 = kw**2
-
-        # Eigenvalue computation
-        eig_p1 = 1/(k**2 + c2) + 1/(kv2  + c2) - 1/c2 - 1/((k/self.r)**2 + c2)
-        eig_p2 = np.exp(-c*eps) * (1/(kv2 + c2) * kv*np.sin(eps*kv) - np.cos(eps*kv))
-        eig_p3 = np.exp(-c*eps)* (-1/(kw2 + c2) * kw*np.sin(eps*kw) - np.cos(eps*kw))
-        eig = eig_p1 + eig_p2 + eig_p3
-        return eig
-
-    def get_eigenvalue2(self, k: int, diam: float):
+    def get_eigenvalue(self, k: int, diam: float):
         c = np.log(2) / (self.r * self.e)
         eps = self.r * self.t
         def gamma(f): return EigenvalueCalculator.cos_integral(k=k, f=f, c=c, l=0, m=eps)
@@ -35,6 +16,33 @@ class EigenvalueCalculator:
         p2 = beta(f=1) + beta(f=1 + 1/self.r) - beta(f=0) - beta(f=-1/self.r)
         eig = 1/diam*(p1 + p2)
         return np.round(eig, decimals=15)
+
+    def get_eigenvalue_simple(self, k: int, diam: float):
+        c = np.log(2) / self.e
+        eps = self.t
+        def beta(f): return EigenvalueCalculator.cos_integral(k=k, f=f, c=c, l=eps, m=diam)
+        eig = 1/diam* (beta(f=2) - beta(f=0))
+        return np.round(eig, decimals=15)
+
+    def get_eigenvalue2(self, k: int, diam: float):
+        c = np.log(2) / (self.r * self.e)
+        eps = self.r * self.t
+        def h1(beta): return EigenvalueCalculator.h(eps=0, phi=eps, beta=beta, c=c, omega=2*np.pi*k/diam)
+        def h2(beta): return EigenvalueCalculator.h(eps=eps, phi=diam/2, beta=beta, c=c, omega=2 * np.pi * k / diam)
+
+        p1 = h1(beta=1) + h1(beta=1 - 1/self.r) - h1(beta=0) - h1(beta=1/self.r)
+        p2 = h2(beta=1) + h2(beta=1 + 1/self.r) - h2(beta=0) - h2(beta=-1/self.r)
+        eig = 1/diam * (p1 + p2)
+        return eig
+        pass
+
+    @staticmethod
+    def h(eps: float, phi: float, beta: float, c: float, omega: float) -> float:
+        c2 = c**2
+        bo = beta*omega
+        bo2 = bo**2
+        def f1(x): return np.cos(bo*x) * np.exp(-c*x)
+        return 2 * c/(bo2 + c2) * (f1(eps) - f1(phi))
 
     @staticmethod
     def cos_integral(k, f, c, l, m):

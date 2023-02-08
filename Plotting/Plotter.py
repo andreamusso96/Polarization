@@ -1,17 +1,11 @@
+from Plotting.SimulationStatisticsPlotter import SimulationStatisticPlotter, SimulationStatisticsHeatMap
+from Plotting.SingleSimulation import SingleSimulationPlotter
 import pandas as pd
 
 from Plotting.HeatMap import HeatMapPlotter, HeatMap
 from Plotting.SingleSimulation import SingleSimulationPlot
-from Database.DB import DB, ParameterRange
+from Database.DB import DB, ParameterRange, ParameterValue
 from typing import List
-
-
-class SimulationStatisticPlotter:
-    @staticmethod
-    def plot_heat_map_sim_statistic(heat_maps: List[HeatMap]) -> None:
-        sim_ids = list(range(1,1000))
-        heat_maps_dfs = [DB.get_heat_map_sim_statistics(x_axis=heat_map.x_axis, y_axis=heat_map.y_axis, z_val=heat_map.z_val, f_name=heat_map.f_name, sim_ids=sim_ids) for heat_map in heat_maps]
-        HeatMapPlotter.plot_heat_maps(heat_maps=heat_maps_dfs)
 
 
 class StabilityPlotter:
@@ -22,21 +16,11 @@ class StabilityPlotter:
         HeatMapPlotter.plot_heat_maps(heat_maps=heat_maps_dfs)
 
 
-class SingleSimulationPlotter:
-    @staticmethod
-    def plot_result(sim_id: int):
-        result = DB.get_simulation_result(sim_id=sim_id)
-        plot = SingleSimulationPlot(result=result)
-        plot.plot_simulation()
-
-
 def plot_heat_maps_sim_statistics():
-    heat_maps = [HeatMap(x_axis='t', y_axis='r', z_val='l2_norm_diff', f_name='avg'),
-                 HeatMap(x_axis='t', y_axis='e', z_val='l2_norm_diff', f_name='avg'),
-                 HeatMap(x_axis='e', y_axis='r', z_val='l2_norm_diff', f_name='avg'),
-                 HeatMap(x_axis='t', y_axis='r', z_val='l2_norm_end', f_name='avg'),
-                 HeatMap(x_axis='t', y_axis='r', z_val='l2_norm_end', f_name='max')]
-    SimulationStatisticPlotter.plot_heat_map_sim_statistic(heat_maps=heat_maps)
+    heat_maps = [SimulationStatisticsHeatMap(x_axis='t', y_axis='e', z_val='l2_norm_diff', f_name='avg', param_values=[ParameterValue(name='r', value=0.5)]),
+                 SimulationStatisticsHeatMap(x_axis='t', y_axis='e', z_val='l2_norm_diff', f_name='avg', param_values=[ParameterValue(name='r', value=0.39999999999999997)]),
+                 SimulationStatisticsHeatMap(x_axis='t', y_axis='e', z_val='l2_norm_diff', f_name='avg', param_values=[ParameterValue(name='r', value=0.3)])]
+    SimulationStatisticPlotter.plot_heat_map(heat_maps=heat_maps)
 
 
 def plot_heat_maps_stability():
@@ -88,5 +72,27 @@ def plot_test():
     for sid in ids:
         SingleSimulationPlotter.plot_result(sim_id=sid)
 
+
+def plot_high_order_integrator():
+    ids = DB.get_all_sim_ids()
+    for sid in ids:
+        SingleSimulationPlotter.plot_result(sim_id=sid)
+
+def high_variance_simulations():
+    ids = DB.get_all_sim_ids()
+    high_variance = []
+    for sid in ids:
+        res = DB.get_simulation_result(sim_id=sid)
+        l2_norm = res.get_l2_norm_df()
+        if l2_norm['l2_norm'].max() > 5:
+            high_variance.append(sid)
+            SingleSimulationPlotter.plot_result(sim_id=sid)
+    return high_variance
+
+def low_r():
+    ids = DB.get_sim_ids(param_values=[ParameterValue(name='r', value=0.5)])
+    for i in ids:
+        SingleSimulationPlotter.plot_result(sim_id=i)
+
 if __name__ == '__main__':
-    plot_test()
+    SingleSimulationPlotter.plot_result(sim_id=1)
