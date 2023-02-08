@@ -33,24 +33,24 @@ class SimulationInitializer:
         return [d0_params_normal]
 
     @staticmethod
-    def get_other_params() -> Tuple[int, int, int, float, float, float]:
-        total_time_span = 10**3
+    def get_other_params() -> Tuple[int, int, int, float, float, float or None]:
+        total_time_span = 10**2
         block_time_span = 10
         n_save_distribution_block = 10
-        bound = 5
+        support = 5
         bin_size = 0.005
-        total_density_threshold = 0.8
-        return total_time_span, n_save_distribution_block, block_time_span, bound, bin_size, total_density_threshold
+        boundary = None
+        return total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary
 
     @staticmethod
-    def get_other_params_test() -> Tuple[int, int, int, float, float, float]:
+    def get_other_params_test() -> Tuple[int, int, int, float, float, float or None]:
         total_time_span = 10
         block_time_span = 5
         n_save_distribution_block = 5
-        bound = 5
-        bin_size = 0.01
-        total_density_threshold = 0.8
-        return total_time_span, block_time_span, n_save_distribution_block, bound, bin_size, total_density_threshold
+        support = 5
+        bin_size = 0.05
+        boundary = 1
+        return total_time_span, block_time_span, n_save_distribution_block, support, bin_size, boundary
 
     @staticmethod
     def get_ts_rs_es() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -61,19 +61,19 @@ class SimulationInitializer:
 
     @staticmethod
     def get_ts_rs_es_test() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        ts = np.array([0.3])
+        ts = np.array([0.2])
         rs = np.array([1])
-        es = np.array([0.1])
+        es = np.array([0.5])
         return ts, rs, es
 
     @staticmethod
     def get_simulation_parameters_list(test: bool) -> List:
         if test:
             ts, rs, es = SimulationInitializer.get_ts_rs_es_test()
-            total_time_span, block_time_span, n_save_distribution_block, bound, bin_size, total_density_threshold = SimulationInitializer.get_other_params_test()
+            total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary = SimulationInitializer.get_other_params_test()
         else:
             ts, rs, es = SimulationInitializer.get_ts_rs_es()
-            total_time_span, block_time_span, n_save_distribution_block, bound, bin_size, total_density_threshold = SimulationInitializer.get_other_params()
+            total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary = SimulationInitializer.get_other_params()
 
         methods = SimulationInitializer.get_methods()
         initial_distributions = SimulationInitializer.get_d0_parameters()
@@ -88,7 +88,7 @@ class SimulationInitializer:
                     for d0_params in initial_distributions:
                         for method in methods:
                             sim_id = sim_ids[c]
-                            sim_params = SimulationParameters(sim_id=sim_id, t=t, r=r, e=e, bound=bound, bin_size=bin_size, d0_parameters=d0_params, total_time_span=total_time_span, block_time_span=block_time_span, n_save_distributions_block=n_save_distribution_block, total_density_threshold=total_density_threshold, method=method)
+                            sim_params = SimulationParameters(sim_id=sim_id, t=t, r=r, e=e, support=support, bin_size=bin_size, boundary=boundary, d0_parameters=d0_params, total_time_span=total_time_span, block_time_span=block_time_span, n_save_distributions_block=n_save_distribution_block, method=method)
                             simulation_parameters.append(sim_params)
                             c += 1
 

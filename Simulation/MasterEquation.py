@@ -11,24 +11,13 @@ class MasterEquation:
         self.r = r
         self.e = e
         self.d0 = d0
-        setattr(MasterEquation, 'bin_size', self.d0.bin_size)
 
-    def solve(self, time_span: int, time_steps_save: int, total_density_threshold: float, method: str):
+    def solve(self, time_span: int, time_steps_save: int, method: str):
         vectorized_integral = np.vectorize(MasterEquation.integral, excluded=set('p'))
         def fun(time, p): return MasterEquation.f(time=time, p=p, t=self.t, e=self.e, r=self.r, d0=self.d0, vectorized_integral=vectorized_integral)
-        events = self.get_events(total_density_threshold=total_density_threshold, max_density_threshold=0.2)
         # solve_ivp complains it wants an Optional, but it works without a List too
-        res = solve_ivp(fun=fun, t_span=(0, time_span), y0=self.d0.bin_probs, t_eval=time_steps_save, events=events, method=method)
+        res = solve_ivp(fun=fun, t_span=(0, time_span), y0=self.d0.bin_probs, t_eval=time_steps_save, method=method)
         return res
-
-    def get_events(self, total_density_threshold: float, max_density_threshold: float) -> List[Callable]:
-        def event_total_density(time, p): return MasterEquation.low_total_density_event(time=time, p=p, bin_size=self.d0.bin_size, threshold=total_density_threshold)
-        def event_max_density(time, p): return MasterEquation.low_max_density_event(time=time, p=p, threshold=max_density_threshold)
-        event_total_density.terminal = True
-        event_max_density.terminal = True
-        events = [event_total_density, event_max_density]
-
-        return events
 
     @staticmethod
     def integrand_simple(a: float, p: np.ndarray, x: float, e: float, r: float, d0: Distribution):
@@ -36,23 +25,38 @@ class MasterEquation:
         return np.power(2, -1 * np.abs(a) / e) * q.pdf(x + a) * (q.pdf(x + 2 * a) - q.pdf(x))
 
     @staticmethod
-    def integrand(a: float, p: np.ndarray, x: float, e: float, r: float, d0: Distribution) -> float:
+    def integrand_attraction(a: float, p: np.ndarray, x: float, e: float, r: float, d0: Distribution) -> float:
         q = rv_histogram((p, d0.bin_edges), density=True)
-        attraction = np.power(2, -1 * np.abs(a) / r*e) * (q.pdf(x + a) * q.pdf(x + a - a/r) - q.pdf(x)*q.pdf(x + a/r))
-        repulsion = np.power(2, -1 * np.abs(a) / r*e) * (q.pdf(x + a) * q.pdf(x + a + a/r) - q.pdf(x)*q.pdf(x - a/r))
-        return attraction + repulsion
+        attraction = np.power(2, -1 * np.abs(a) / r * e) * (q.pdf(x + a) * q.pdf(x + a - a / r) - q.pdf(x) * q.pdf(x + a / r))
+        return attraction
+
+    @staticmethod
+    def integrand_repulsion(a: float, p: np.ndarray, x: float, e: float, r: float, d0: Distribution) -> float:
+        q = rv_histogram((p, d0.bin_edges), density=True)
+        repulsion = np.power(2, -1 * np.abs(a) / r * e) * (q.pdf(x + a) * q.pdf(x + a + a / r) - q.pdf(x) * q.pdf(x - a / r))
+        return repulsion
 
     @staticmethod
     def integral(x: float, p: np.ndarray, t: float, e: float, r: float, d0: Distribution) -> float:
         rt = r*t
-        result0, abserr = fixed_quad(MasterEquation.integrand, a=-rt, b=rt, args=(p, x, e, r, d0))
-        result1, abserr = fixed_quad(MasterEquation.integrand, a=rt, b=d0.bound, args=(p, x, e, r, d0))
-        result2, abserr = fixed_quad(MasterEquation.integrand, a=-d0.bound, b=-rt, args=(p, x, e, r, d0))
+        result0, abserr = fixed_quad(MasterEquation.integrand_attraction, a=-rt, b=rt, args=(p, x, e, r, d0))
+        result1, abserr = fixed_quad(MasterEquation.integrand_repulsion, a=rt, b=d0.support, args=(p, x, e, r, d0))
+        result2, abserr = fixed_quad(MasterEquation.integrand_repulsion, a=-d0.support, b=-rt, args=(p, x, e, r, d0))
         return result0 + result1 + result2
 
     @staticmethod
     def f(time: float, p: np.ndarray, t: float, e: float, r: float, d0: Distribution, vectorized_integral: callable) -> np.ndarray:
         res = vectorized_integral(x=d0.bin_centers, p=p, t=t, e=e, r=r, d0=d0)
+        if d0.boundary is not None:
+            res = MasterEquation.implement_boundary_condition(res=res, left_boundary_bin_index=d0.left_boundary_bin_index, right_boundary_bin_index=d0.right_boundary_bin_index, bin_size=d0.bin_size)
+        return res
+
+    @staticmethod
+    def implement_boundary_condition(res: np.ndarray, left_boundary_bin_index: int, right_boundary_bin_index: int, bin_size: float) -> np.ndarray:
+        res[left_boundary_bin_index] += np.sum(res[:left_boundary_bin_index] * bin_size)
+        res[right_boundary_bin_index - 1] += np.sum(res[right_boundary_bin_index:] * bin_size)
+        res[:left_boundary_bin_index] = 0
+        res[right_boundary_bin_index:] = 0
         return res
 
     @staticmethod

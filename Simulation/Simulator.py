@@ -26,14 +26,13 @@ class Simulator:
         me = MasterEquation(t=self.params.t, r=self.params.r, e=self.params.e, d0=current_d)
         time_steps_save_distribution_block = self.get_time_steps_save_distributions_block(current_t=current_t)
         res_scipy = me.solve(time_span=current_t + self.params.block_time_span,
-                             time_steps_save=time_steps_save_distribution_block,
-                             total_density_threshold=self.params.total_density_threshold, method=self.params.method)
+                             time_steps_save=time_steps_save_distribution_block, method=self.params.method)
         return res_scipy
 
     def get_current_d(self, res_scipy):
         bin_probs = res_scipy.y[:, -1]
-        bin_edges = DistributionGenerator.get_bins(bound=self.params.bound, bin_size=self.params.bin_size)
-        return Distribution(bin_probs=bin_probs, bin_edges=bin_edges)
+        bin_edges = DistributionGenerator.get_bins(support=self.params.support, bin_size=self.params.bin_size)
+        return Distribution(bin_probs=bin_probs, bin_edges=bin_edges, boundary=self.params.boundary)
 
     def save_partial_result(self, res_scipy, current_t: int):
         distributions_df = self.get_distributions_df(res_scipy=res_scipy, t_start=current_t)
@@ -45,7 +44,7 @@ class Simulator:
         for i in range(len(res_scipy.t)):
             time = t_start + int(res_scipy.t[i])
             bin_probs = res_scipy.y[:, i]
-            bin_edges = DistributionGenerator.get_bins(bound=self.params.bound, bin_size=self.params.bin_size)
+            bin_edges = DistributionGenerator.get_bins(support=self.params.support, bin_size=self.params.bin_size)
             data = np.vstack((time*np.ones(len(bin_probs)), bin_edges[:-1], bin_probs)).T
             df_time = pd.DataFrame(data=data, columns=['time', 'left_bin', 'dist_value'])
             dfs.append(df_time)
@@ -64,19 +63,31 @@ class Simulator:
 
 if __name__ == '__main__':
     from Simulation.Parameters import DistributionParameters
-    bound = 10
-    bin_size = 0.1
-    dist_params = DistributionParameters(name='normal', params={'loc': 0, 'scale': 0.2})
-    total_time_span = 10
-    n_save_distributions_block = 5
-    block_time_span = 5
-    total_density_threshold = 0.8
-    method = 'DOP853'
-    p = SimulationParameters(sim_id=1, t=0.2, r=1, e=0.5, bound=bound, bin_size=bin_size,
-                                  d0_parameters=dist_params,
-                                  total_time_span=total_time_span, n_save_distributions_block=n_save_distributions_block,
-                                  block_time_span=block_time_span,
-                                  total_density_threshold=total_density_threshold, method=method)
+    import time
+    def get_parameters():
+        support = 5
+        bin_size = 0.1
+        dist_params = DistributionParameters(name='normal', params={'loc': 0, 'scale': 0.2})
+        total_time_span = 10
+        n_save_distributions_block = 5
+        block_time_span = 5
+        boundary = None
+        method = 'DOP853'
+        p = SimulationParameters(sim_id=1, t=0.2, r=1, e=0.5, support=support, bin_size=bin_size, boundary=boundary,
+                                      d0_parameters=dist_params,
+                                      total_time_span=total_time_span, n_save_distributions_block=n_save_distributions_block,
+                                      block_time_span=block_time_span, method=method)
+        return p
+
+    def get_parameters_from_db():
+        sim_id = 1
+        p = DB.get_simulation_parameters(sim_id=sim_id)
+        return p
+
+    p = get_parameters_from_db()
     s = Simulator(params=p)
+    t1 =  time.time()
     res = s.run_simulation()
+    t2 = time.time()
+    print('TOTAL TIME SIMULATION', t2-t1)
 

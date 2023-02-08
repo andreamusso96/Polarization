@@ -29,11 +29,10 @@ class DBParameters:
 
     @staticmethod
     def _sim_table_row_to_parameters(row) -> SimulationParameters:
-        p = SimulationParameters(sim_id=row.sim_id, t=row.t, r=row.r, e=row.e, bound=row.bound, bin_size=row.bin_size,
+        p = SimulationParameters(sim_id=row.sim_id, t=row.t, r=row.r, e=row.e, support=row.support, bin_size=row.bin_size, boundary=row.boundary,
                                  d0_parameters=DistributionParameters.from_string(row.d0_parameters), total_time_span=row.total_time_span,
                                  block_time_span=row.block_time_span,
-                                 n_save_distributions_block=row.n_save_distributions_block,
-                                 total_density_threshold=row.total_density_threshold, method=row.method)
+                                 n_save_distributions_block=row.n_save_distributions_block, method=row.method)
         return p
 
     @staticmethod
@@ -43,8 +42,7 @@ class DBParameters:
                                         total_time_span=params.total_time_span,
                                         block_time_span=params.block_time_span,
                                         n_save_distributions_block=params.n_save_distributions_block,
-                                        bound=params.bound, bin_size=params.bin_size,
-                                        total_density_threshold=params.total_density_threshold,
+                                        support=params.support, bin_size=params.bin_size, boundary=params.boundary,
                                         method=params.method,
                                         d0_parameters=params.d0_parameters.to_string(), complete=False, success=False)
         conn.execute(stmt)
