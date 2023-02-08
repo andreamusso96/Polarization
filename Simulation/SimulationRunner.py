@@ -15,7 +15,7 @@ class SimulationRunner:
         ids_sims_to_run = SimulationRunner.get_ids_incomplete_simulations()
         for sim_id in ids_sims_to_run:
             if is_cluster:
-                time_in_mins = 20*60
+                time_in_mins = 10*60
                 args_sim = ['sbatch', f'--time={time_in_mins}', f'--wrap="python -m main {str(sim_id)}"']
             else:
                 args_sim = ['python', '-m', 'main', str(sim_id)]
