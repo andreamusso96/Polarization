@@ -13,6 +13,7 @@ class Distribution:
         self.bin_size = np.round(np.abs(bin_edges[0] - bin_edges[1]), decimals=5)
         self.support = bin_edges[-1]
         self.bin_centers = (self.bin_edges + self.bin_size / 2)[:-1]
+        self.n_bins = len(bin_probs)
 
         if self.boundary is not None:
             self.left_boundary_bin_index, self.right_boundary_bin_index = self.get_boundary_bins_indices()

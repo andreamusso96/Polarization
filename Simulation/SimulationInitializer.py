@@ -45,8 +45,8 @@ class SimulationInitializer:
     @staticmethod
     def get_other_params_test() -> Tuple[int, int, int, float, float, float or None]:
         total_time_span = 10
-        block_time_span = 10
-        n_save_distribution_block = 5
+        block_time_span = 1
+        n_save_distribution_block = 1
         support = 5
         bin_size = 0.01
         boundary = None

@@ -1,8 +1,7 @@
 from Simulation.Distribution import Distribution
-from scipy.integrate import quad, fixed_quad, solve_ivp
+from scipy.integrate import quad, solve_ivp
 from scipy.stats import rv_histogram
 import numpy as np
-from typing import Callable, List
 
 
 class MasterEquation:
@@ -35,9 +34,9 @@ class MasterEquation:
     @staticmethod
     def integral(x: float, q: rv_histogram, t: float, e: float, r: float, support: float) -> float:
         rt = r*t
-        result0, abserr = fixed_quad(MasterEquation.integrand_attraction, a=-rt, b=rt, args=(q, x, e, r))
-        result1, abserr = fixed_quad(MasterEquation.integrand_repulsion, a=rt, b=support, args=(q, x, e, r))
-        result2, abserr = fixed_quad(MasterEquation.integrand_repulsion, a=-support, b=-rt, args=(q, x, e, r))
+        result0, abserr0 = quad(MasterEquation.integrand_attraction, a=-rt, b=rt, args=(q, x, e, r), limit=100)
+        result1, abserr1 = quad(MasterEquation.integrand_repulsion, a=rt, b=support, args=(q, x, e, r), limit=500)
+        result2, abserr2 = quad(MasterEquation.integrand_repulsion, a=-support, b=-rt, args=(q, x, e, r), limit=500)
         return result0 + result1 + result2
 
     @staticmethod

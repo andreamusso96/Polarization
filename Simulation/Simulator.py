@@ -84,7 +84,7 @@ if __name__ == '__main__':
         p = DB.get_simulation_parameters(sim_id=sim_id)
         return p
 
-    p = get_parameters_from_db()
+    p = get_parameters()
     s = Simulator(params=p)
     t1 =  time.time()
     res = s.run_simulation()
