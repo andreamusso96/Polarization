@@ -24,7 +24,7 @@ class SimulationInitializer:
 
     @staticmethod
     def get_methods() -> List[str]:
-        return ['DOP853']
+        return ['RK45', 'DOP853']
 
     @staticmethod
     def get_d0_parameters() -> List[DistributionParameters]:
@@ -61,9 +61,9 @@ class SimulationInitializer:
 
     @staticmethod
     def get_ts_rs_es_test() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        ts = np.array([0.2, 0.7])
-        rs = np.array([1, 0.3])
-        es = np.array([0.2, 0.8])
+        ts = np.array([0.4])
+        rs = np.array([0.8])
+        es = np.array([0.5])
         return ts, rs, es
 
     @staticmethod
@@ -78,8 +78,14 @@ class SimulationInitializer:
         methods = SimulationInitializer.get_methods()
         initial_distributions = SimulationInitializer.get_d0_parameters()
         n_sims = len(ts)*len(rs)*len(es)*len(initial_distributions)*len(methods)
-        sim_ids = SimulationInitializer.get_sim_ids(n_sims=n_sims)
 
+        # Should delete later
+        bin_sizes = [0.01, 0.05, 0.1]
+        supports = [5, 3, 2]
+        n_sims = n_sims*len(bin_sizes)*len(supports)
+        # Up to here
+
+        sim_ids = SimulationInitializer.get_sim_ids(n_sims=n_sims)
         simulation_parameters = []
         c = 0
         for t in ts:
@@ -87,10 +93,12 @@ class SimulationInitializer:
                 for e in es:
                     for d0_params in initial_distributions:
                         for method in methods:
-                            sim_id = sim_ids[c]
-                            sim_params = SimulationParameters(sim_id=sim_id, t=t, r=r, e=e, support=support, bin_size=bin_size, boundary=boundary, d0_parameters=d0_params, total_time_span=total_time_span, block_time_span=block_time_span, n_save_distributions_block=n_save_distribution_block, method=method)
-                            simulation_parameters.append(sim_params)
-                            c += 1
+                            for bin_size in bin_sizes:
+                                for support in supports:
+                                    sim_id = sim_ids[c]
+                                    sim_params = SimulationParameters(sim_id=sim_id, t=t, r=r, e=e, support=support, bin_size=bin_size, boundary=boundary, d0_parameters=d0_params, total_time_span=total_time_span, block_time_span=block_time_span, n_save_distributions_block=n_save_distribution_block, method=method)
+                                    simulation_parameters.append(sim_params)
+                                    c += 1
 
         return simulation_parameters
 
