@@ -42,11 +42,11 @@ class MasterEquation:
 
     @staticmethod
     def f(time: float, p: np.ndarray, t: float, e: float, r: float, d0: Distribution, vectorized_integral: callable) -> np.ndarray:
-        q = rv_histogram((p, d0.bin_edges), density=True)
+        q = rv_histogram((np.round(p, decimals=16), d0.bin_edges), density=True)
         res = vectorized_integral(x=d0.bin_centers, q=q, t=t, e=e, r=r, support=d0.support)
         if d0.boundary is not None:
             res = MasterEquation.implement_boundary_condition(res=res, left_boundary_bin_index=d0.left_boundary_bin_index, right_boundary_bin_index=d0.right_boundary_bin_index, bin_size=d0.bin_size)
-        return res
+        return np.round(res, decimals=16)
 
     @staticmethod
     def implement_boundary_condition(res: np.ndarray, left_boundary_bin_index: int, right_boundary_bin_index: int, bin_size: float) -> np.ndarray:

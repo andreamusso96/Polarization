@@ -61,9 +61,9 @@ class SimulationInitializer:
 
     @staticmethod
     def get_ts_rs_es_test() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        ts = np.array([0.2])
-        rs = np.array([1])
-        es = np.array([0.5])
+        ts = np.array([0.2, 0.7])
+        rs = np.array([1, 0.3])
+        es = np.array([0.2, 0.8])
         return ts, rs, es
 
     @staticmethod
