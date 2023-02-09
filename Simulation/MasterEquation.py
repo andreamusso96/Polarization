@@ -13,7 +13,7 @@ class MasterEquation:
         self.d0 = d0
 
     def solve(self, time_span: int, time_steps_save: int, method: str):
-        vectorized_integral = np.vectorize(MasterEquation.integral, excluded=set('p'))
+        vectorized_integral = np.vectorize(MasterEquation.integral, excluded=set('q'))
         def fun(time, p): return MasterEquation.f(time=time, p=p, t=self.t, e=self.e, r=self.r, d0=self.d0, vectorized_integral=vectorized_integral)
         # solve_ivp complains it wants an Optional, but it works without a List too
         res = solve_ivp(fun=fun, t_span=(0, time_span), y0=self.d0.bin_probs, t_eval=time_steps_save, method=method)
@@ -25,28 +25,25 @@ class MasterEquation:
         return np.power(2, -1 * np.abs(a) / e) * q.pdf(x + a) * (q.pdf(x + 2 * a) - q.pdf(x))
 
     @staticmethod
-    def integrand_attraction(a: float, p: np.ndarray, x: float, e: float, r: float, d0: Distribution) -> float:
-        q = rv_histogram((p, d0.bin_edges), density=True)
-        attraction = np.power(2, -1 * np.abs(a) / r * e) * (q.pdf(x + a) * q.pdf(x + a - a / r) - q.pdf(x) * q.pdf(x + a / r))
-        return attraction
+    def integrand_attraction(a: float, q: rv_histogram, x: float, e: float, r: float) -> float:
+        return np.power(2, -1 * np.abs(a) / r * e) * (q.pdf(x + a) * q.pdf(x + a - a / r) - q.pdf(x) * q.pdf(x + a / r))
 
     @staticmethod
-    def integrand_repulsion(a: float, p: np.ndarray, x: float, e: float, r: float, d0: Distribution) -> float:
-        q = rv_histogram((p, d0.bin_edges), density=True)
-        repulsion = np.power(2, -1 * np.abs(a) / r * e) * (q.pdf(x + a) * q.pdf(x + a + a / r) - q.pdf(x) * q.pdf(x - a / r))
-        return repulsion
+    def integrand_repulsion(a: float, q: rv_histogram, x: float, e: float, r: float) -> float:
+        return np.power(2, -1 * np.abs(a) / r * e) * (q.pdf(x + a) * q.pdf(x + a + a / r) - q.pdf(x) * q.pdf(x - a / r))
 
     @staticmethod
-    def integral(x: float, p: np.ndarray, t: float, e: float, r: float, d0: Distribution) -> float:
+    def integral(x: float, q: rv_histogram, t: float, e: float, r: float, support: float) -> float:
         rt = r*t
-        result0, abserr = fixed_quad(MasterEquation.integrand_attraction, a=-rt, b=rt, args=(p, x, e, r, d0))
-        result1, abserr = fixed_quad(MasterEquation.integrand_repulsion, a=rt, b=d0.support, args=(p, x, e, r, d0))
-        result2, abserr = fixed_quad(MasterEquation.integrand_repulsion, a=-d0.support, b=-rt, args=(p, x, e, r, d0))
+        result0, abserr = fixed_quad(MasterEquation.integrand_attraction, a=-rt, b=rt, args=(q, x, e, r))
+        result1, abserr = fixed_quad(MasterEquation.integrand_repulsion, a=rt, b=support, args=(q, x, e, r))
+        result2, abserr = fixed_quad(MasterEquation.integrand_repulsion, a=-support, b=-rt, args=(q, x, e, r))
         return result0 + result1 + result2
 
     @staticmethod
     def f(time: float, p: np.ndarray, t: float, e: float, r: float, d0: Distribution, vectorized_integral: callable) -> np.ndarray:
-        res = vectorized_integral(x=d0.bin_centers, p=p, t=t, e=e, r=r, d0=d0)
+        q = rv_histogram((p, d0.bin_edges), density=True)
+        res = vectorized_integral(x=d0.bin_centers, q=q, t=t, e=e, r=r, support=d0.support)
         if d0.boundary is not None:
             res = MasterEquation.implement_boundary_condition(res=res, left_boundary_bin_index=d0.left_boundary_bin_index, right_boundary_bin_index=d0.right_boundary_bin_index, bin_size=d0.bin_size)
         return res
@@ -58,15 +55,3 @@ class MasterEquation:
         res[:left_boundary_bin_index] = 0
         res[right_boundary_bin_index:] = 0
         return res
-
-    @staticmethod
-    def low_total_density_event(time: float, p: np.ndarray, bin_size: float, threshold: float) -> float:
-        total_density = np.sum(p*bin_size)
-        return total_density - threshold
-
-    @staticmethod
-    def low_max_density_event(time: float, p: np.ndarray, threshold: float) -> float:
-        max_density = np.max(p)
-        return max_density - threshold
-
-

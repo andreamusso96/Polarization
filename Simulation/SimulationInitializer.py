@@ -44,13 +44,13 @@ class SimulationInitializer:
 
     @staticmethod
     def get_other_params_test() -> Tuple[int, int, int, float, float, float or None]:
-        total_time_span = 10
+        total_time_span = 5
         block_time_span = 5
         n_save_distribution_block = 5
         support = 5
         bin_size = 0.01
-        boundary = None
-        return total_time_span, block_time_span, n_save_distribution_block, support, bin_size, boundary
+        boundary = 1
+        return total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary
 
     @staticmethod
     def get_ts_rs_es() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
