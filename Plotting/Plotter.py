@@ -95,4 +95,5 @@ def low_r():
         SingleSimulationPlotter.plot_result(sim_id=i)
 
 if __name__ == '__main__':
-    SingleSimulationPlotter.plot_result(sim_id=1)
+    for s in range(1, 8):
+        SingleSimulationPlotter.plot_result(sim_id=s)

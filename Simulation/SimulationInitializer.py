@@ -49,7 +49,7 @@ class SimulationInitializer:
         n_save_distribution_block = 5
         support = 5
         bin_size = 0.01
-        boundary = 1
+        boundary = None
         return total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary
 
     @staticmethod
