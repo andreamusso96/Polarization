@@ -58,7 +58,7 @@ class DistributionGenerator:
 
     @staticmethod
     def get_bins(support: float, bin_size: float) -> np.ndarray:
-        bins = np.round(np.arange(start=-support, stop=support + bin_size, step=bin_size), decimals=2)
+        bins = np.round(np.arange(start=-support, stop=support + bin_size, step=bin_size), decimals=3)
         return bins
 
     @staticmethod

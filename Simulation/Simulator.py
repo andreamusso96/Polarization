@@ -59,37 +59,3 @@ class Simulator:
             time_steps_save_distribution_block = np.insert(time_steps_save_distribution_block, 0, 0.0)
         return time_steps_save_distribution_block - current_t
 
-
-
-if __name__ == '__main__':
-    from Simulation.Parameters import DistributionParameters
-    from pyinstrument import Profiler
-    import time
-    def get_parameters():
-        support = 3
-        bin_size = 0.1
-        dist_params = DistributionParameters(name='normal', params={'loc': 0, 'scale': 0.2})
-        total_time_span = 2
-        n_save_distributions_block = 2
-        block_time_span = 2
-        boundary = None
-        method = 'DOP853'
-        p = SimulationParameters(sim_id=1, t=0.2, r=1, e=0.5, support=support, bin_size=bin_size, boundary=boundary,
-                                      d0_parameters=dist_params,
-                                      total_time_span=total_time_span, n_save_distributions_block=n_save_distributions_block,
-                                      block_time_span=block_time_span, method=method, num_processes=1)
-        return p
-
-    def get_parameters_from_db():
-        sim_id = 1
-        p = DB.get_simulation_parameters(sim_ids=[sim_id])[0]
-        return p
-
-    p = get_parameters()
-    s = Simulator(params=p)
-    profiler = Profiler()
-    profiler.start()
-    s.run_simulation()
-    profiler.stop()
-    print(profiler.output_text(unicode=True, color=True))
-
