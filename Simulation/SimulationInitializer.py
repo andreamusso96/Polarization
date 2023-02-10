@@ -18,7 +18,7 @@ class SimulationInitializer:
 
     @staticmethod
     def get_methods() -> List[str]:
-        return ['RK45', 'DOP853']
+        return ['DOP853']
 
     @staticmethod
     def get_d0_parameters() -> List[DistributionParameters]:
@@ -100,4 +100,4 @@ class SimulationInitializer:
 if __name__ == '__main__':
     from Database.Tables import CreateTable
     CreateTable.create_simulation_table()
-    SimulationInitializer.insert_simulation_parameters_in_db(test=True)
+    SimulationInitializer.insert_simulation_parameters_in_db(test=False)

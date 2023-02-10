@@ -31,22 +31,18 @@ class ProfilingTest:
         return d0
 
     @staticmethod
-    def _speed_test():
-        pass
-
-    @staticmethod
-    def profile():
+    def profile(method):
         from pyinstrument import Profiler
         profiler = Profiler()
         profiler.start()
-        ProfilingTest._speed_test()
+        method()
         profiler.stop()
         profiler.open_in_browser()
 
 
 class SimulatorTest(ProfilingTest):
     @staticmethod
-    def _speed_test():
+    def speed_test():
         p = SimulatorTest.get_parameters()
         sim = Simulator(p)
         sim.run_simulation()
@@ -55,14 +51,14 @@ class SimulatorTest(ProfilingTest):
 class MasterEquationTest(ProfilingTest):
     @staticmethod
     def get_parameters():
-        p = super().get_parameters()
-        d0 = super().get_distribution()
+        p = ProfilingTest.get_parameters()
+        d0 = ProfilingTest.get_distribution()
         t_span = p.total_time_span
         time_step_save = [0, 1]
         return p, d0, t_span, time_step_save
 
     @staticmethod
-    def _speed_test():
+    def speed_test():
         p, d0, t_span, time_step_save = MasterEquationTest.get_parameters()
         me = MasterEquation(t=p.t, r=p.r, e=p.e, d0=d0)
         res = me.solve(time_span=t_span, time_steps_save=time_step_save, method=p.method)
@@ -72,8 +68,8 @@ class MasterEquationTest(ProfilingTest):
 class FastIntegrationTest(ProfilingTest):
     @staticmethod
     def get_parameters():
-        p = super().get_parameters()
-        d0 = super().get_distribution()
+        p = ProfilingTest.get_parameters()
+        d0 = ProfilingTest.get_distribution()
         rt = p.r * p.t
         lb, ub = tuple(np.searchsorted(d0.bin_edges, np.array([-rt, rt])))
         support_a = d0.bin_centers[lb:ub]
@@ -82,7 +78,7 @@ class FastIntegrationTest(ProfilingTest):
         return d0, support_a, support_r, p.e, p.r
 
     @staticmethod
-    def _speed_test():
+    def speed_test():
         d0, support_a, support_r, e, r = FastIntegrationTest.get_parameters()
         p = d0.bin_probs
         for i in range(100):
@@ -92,5 +88,4 @@ class FastIntegrationTest(ProfilingTest):
 
 
 if __name__ == '__main__':
-    FastIntegrationTest.profile()
-    MasterEquationTest.profile()
+    MasterEquationTest.profile(MasterEquationTest.speed_test())
