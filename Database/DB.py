@@ -31,9 +31,9 @@ class DB:
 
     # SimulationParameters
     @staticmethod
-    def get_simulation_parameters(sim_id: int) -> SimulationParameters:
+    def get_simulation_parameters(sim_ids: List[int]) -> List[SimulationParameters]:
         with engine.begin() as conn:
-            return DBParameters.get_simulation_parameters(conn=conn, sim_id=sim_id)
+            return DBParameters.get_simulation_parameters(conn=conn, sim_ids=sim_ids)
 
     # Simulation statistics
     @staticmethod
@@ -85,21 +85,3 @@ class DB:
     def get_heat_map_stability(x_axis: str, y_axis: str, z_val: str, f_name: str) -> pd.DataFrame:
         with engine.begin() as conn:
             return DBHeatMaps.get_heat_map_stability(conn=conn, x_axis=x_axis, y_axis=y_axis, z_val=z_val, f_name=f_name)
-    # Check if database is locked
-
-    @staticmethod
-    def is_database_locked() -> bool:
-        try:
-            with engine.connect() as conn:
-                # Try to insert a row with sim_id = -1 and see if it works, if it does not it will throw an error
-                # If the error contains the string 'database is locked' then the database is locked
-                conn.execute(text(f"PRAGMA busy_timeout = {300}"))
-                p = DBParameters.get_simulation_parameters(conn=conn, sim_id=1)
-                p.sim_id = -1
-                DBParameters.insert_parameters(conn=conn, params=p)
-                conn.rollback()
-        except Exception as e:
-            if 'database is locked' in str(e):
-                print('DB is locked')
-                return True
-        return False

@@ -10,7 +10,6 @@ import numpy as np
 class Simulator:
     def __init__(self, params: SimulationParameters):
         self.params = params
-        self.me = MasterEquation(t=params.t, r=params.r, e=params.e, d0=params.d)
         self.time_steps_save_distribution = np.arange(0, self.params.total_time_span + 1)
 
     def run_simulation(self) -> None:
@@ -22,11 +21,13 @@ class Simulator:
             current_t += self.params.block_time_span
             current_d = self.get_current_d(res_scipy=res_scipy)
 
+        DB.set_flags_simulation_complete(sim_id=self.params.sim_id, success=True)
+
     def solve_block(self, current_t: int, current_d: Distribution):
         me = MasterEquation(t=self.params.t, r=self.params.r, e=self.params.e, d0=current_d)
         time_steps_save_distribution_block = self.get_time_steps_save_distributions_block(current_t=current_t)
         res_scipy = me.solve(time_span=current_t + self.params.block_time_span,
-                             time_steps_save=time_steps_save_distribution_block, method=self.params.method)
+                             time_steps_save=time_steps_save_distribution_block, method=self.params.method, num_processes=self.params.num_processes)
         return res_scipy
 
     def get_current_d(self, res_scipy):
@@ -63,14 +64,15 @@ class Simulator:
 
 if __name__ == '__main__':
     from Simulation.Parameters import DistributionParameters
+    from pyinstrument import Profiler
     import time
     def get_parameters():
-        support = 5
+        support = 3
         bin_size = 0.1
         dist_params = DistributionParameters(name='normal', params={'loc': 0, 'scale': 0.2})
-        total_time_span = 10
-        n_save_distributions_block = 5
-        block_time_span = 5
+        total_time_span = 2
+        n_save_distributions_block = 2
+        block_time_span = 2
         boundary = None
         method = 'DOP853'
         p = SimulationParameters(sim_id=1, t=0.2, r=1, e=0.5, support=support, bin_size=bin_size, boundary=boundary,
@@ -81,13 +83,14 @@ if __name__ == '__main__':
 
     def get_parameters_from_db():
         sim_id = 1
-        p = DB.get_simulation_parameters(sim_id=sim_id)
+        p = DB.get_simulation_parameters(sim_ids=[sim_id])[0]
         return p
 
     p = get_parameters()
     s = Simulator(params=p)
-    t1 =  time.time()
-    res = s.run_simulation()
-    t2 = time.time()
-    print('TOTAL TIME SIMULATION', t2-t1)
+    profiler = Profiler()
+    profiler.start()
+    s.run_simulation()
+    profiler.stop()
+    print(profiler.output_text(unicode=True, color=True))
 

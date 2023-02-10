@@ -6,17 +6,20 @@ import time
 
 class SimulationRunner:
     @staticmethod
-    def get_ids_incomplete_simulations():
+    def get_params_incomplete_simulations():
         ids_incomplete_simulations = DB.get_sim_ids(param_values=[ParameterValue(name='complete', value=False)])
-        return ids_incomplete_simulations
+        params = DB.get_simulation_parameters(sim_ids=ids_incomplete_simulations)
+        return params
 
     @staticmethod
     def run_simulations():
-        ids_sims_to_run = SimulationRunner.get_ids_incomplete_simulations()
-        for sim_id in ids_sims_to_run:
+        params_sims_to_run = SimulationRunner.get_params_incomplete_simulations()
+        for p in params_sims_to_run:
+            sim_id = p.sim_id
             if is_cluster:
-                time_in_mins = 20*60
-                args_sim = ['sbatch', f'--time={time_in_mins}', f'--wrap="python -m main {str(sim_id)}"']
+                time_in_mins = 20
+                cpus_per_task = p.num_processes
+                args_sim = ['sbatch', f'--time={time_in_mins}', f'--cpus-per-task={cpus_per_task}', f'--wrap="python -m main {str(sim_id)}"']
             else:
                 args_sim = ['python', '-m', 'main', str(sim_id)]
 

@@ -33,24 +33,26 @@ class SimulationInitializer:
         return [d0_params_normal]
 
     @staticmethod
-    def get_other_params() -> Tuple[int, int, int, float, float, float or None]:
+    def get_other_params() -> Tuple[int, int, int, float, float, float or None, int]:
         total_time_span = 10**2
         block_time_span = 10
         n_save_distribution_block = 10
         support = 5
         bin_size = 0.01
         boundary = None
-        return total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary
+        num_processes = 10
+        return total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary, num_processes
 
     @staticmethod
-    def get_other_params_test() -> Tuple[int, int, int, float, float, float or None]:
-        total_time_span = 10
+    def get_other_params_test() -> Tuple[int, int, int, float, float, float or None, int]:
+        total_time_span = 8
         block_time_span = 2
         n_save_distribution_block = 2
-        support = 5
+        support = 3
         bin_size = 0.01
         boundary = None
-        return total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary
+        num_processes = 10
+        return total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary, num_processes
 
     @staticmethod
     def get_ts_rs_es() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -70,19 +72,15 @@ class SimulationInitializer:
     def get_simulation_parameters_list(test: bool) -> List:
         if test:
             ts, rs, es = SimulationInitializer.get_ts_rs_es_test()
-            total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary = SimulationInitializer.get_other_params_test()
+            total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary, num_processes = SimulationInitializer.get_other_params_test()
         else:
             ts, rs, es = SimulationInitializer.get_ts_rs_es()
-            total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary = SimulationInitializer.get_other_params()
+            total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary, num_processes = SimulationInitializer.get_other_params()
 
         methods = SimulationInitializer.get_methods()
         initial_distributions = SimulationInitializer.get_d0_parameters()
         n_sims = len(ts)*len(rs)*len(es)*len(initial_distributions)*len(methods)
 
-        # Should delete later
-        bin_sizes = [0.01, 0.05, 0.1]
-        supports = [5, 3, 2]
-        n_sims = n_sims*len(bin_sizes)*len(supports)
         # Up to here
 
         sim_ids = SimulationInitializer.get_sim_ids(n_sims=n_sims)
@@ -93,12 +91,10 @@ class SimulationInitializer:
                 for e in es:
                     for d0_params in initial_distributions:
                         for method in methods:
-                            for bin_size in bin_sizes:
-                                for support in supports:
-                                    sim_id = sim_ids[c]
-                                    sim_params = SimulationParameters(sim_id=sim_id, t=t, r=r, e=e, support=support, bin_size=bin_size, boundary=boundary, d0_parameters=d0_params, total_time_span=total_time_span, block_time_span=block_time_span, n_save_distributions_block=n_save_distribution_block, method=method)
-                                    simulation_parameters.append(sim_params)
-                                    c += 1
+                            sim_id = sim_ids[c]
+                            sim_params = SimulationParameters(sim_id=sim_id, t=t, r=r, e=e, support=support, bin_size=bin_size, boundary=boundary, d0_parameters=d0_params, total_time_span=total_time_span, block_time_span=block_time_span, n_save_distributions_block=n_save_distribution_block, method=method, num_processes=num_processes)
+                            simulation_parameters.append(sim_params)
+                            c += 1
 
         return simulation_parameters
 

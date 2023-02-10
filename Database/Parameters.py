@@ -3,6 +3,7 @@ from Simulation.Parameters import SimulationParameters
 from Simulation.Distribution import DistributionParameters
 from sqlalchemy import select, insert
 from sqlalchemy.engine import Connection
+from typing import List
 
 
 class ParameterValue:
@@ -20,19 +21,22 @@ class ParameterRange:
 
 class DBParameters:
     @staticmethod
-    def get_simulation_parameters(conn: Connection, sim_id: int) -> SimulationParameters:
+    def get_simulation_parameters(conn: Connection, sim_ids: List[int]) -> List[SimulationParameters]:
         sim_table = GetTable.get_simulation_table()
-        stmt = select(sim_table).where(sim_table.c.sim_id == sim_id)
+        stmt = select(sim_table).where(sim_table.c.sim_id.in_(sim_ids))
         res = conn.execute(stmt).all()
-        p = DBParameters._sim_table_row_to_parameters(row=res[0])
-        return p
+        params = []
+        for row in res:
+            p = DBParameters._sim_table_row_to_parameters(row=row)
+            params.append(p)
+        return params
 
     @staticmethod
     def _sim_table_row_to_parameters(row) -> SimulationParameters:
         p = SimulationParameters(sim_id=row.sim_id, t=row.t, r=row.r, e=row.e, support=row.support, bin_size=row.bin_size, boundary=row.boundary,
                                  d0_parameters=DistributionParameters.from_string(row.d0_parameters), total_time_span=row.total_time_span,
                                  block_time_span=row.block_time_span,
-                                 n_save_distributions_block=row.n_save_distributions_block, method=row.method)
+                                 n_save_distributions_block=row.n_save_distributions_block, method=row.method, num_processes=row.num_processes)
         return p
 
     @staticmethod
@@ -44,5 +48,6 @@ class DBParameters:
                                         n_save_distributions_block=params.n_save_distributions_block,
                                         support=params.support, bin_size=params.bin_size, boundary=params.boundary,
                                         method=params.method,
+                                        num_processes=params.num_processes,
                                         d0_parameters=params.d0_parameters.to_string(), complete=False, success=False)
         conn.execute(stmt)
