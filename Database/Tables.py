@@ -50,6 +50,7 @@ class CreateTable:
                                  Column("bin_size", Float),
                                  Column("boundary", Float),
                                  Column("method", String),
+                                 Column("num_processes", Integer),
                                  Column("d0_parameters", String),
                                  Column("complete", Boolean),
                                  Column("success", Boolean))
