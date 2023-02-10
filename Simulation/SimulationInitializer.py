@@ -6,12 +6,6 @@ from typing import List, Tuple
 import numpy as np
 
 
-class SimulationInitializerHighVarianceSimulations:
-    @staticmethod
-    def get_ids() -> List[int]:
-        return [18, 27, 31, 32, 33, 34, 52, 53, 81, 96, 109, 111, 119, 127, 128, 129, 130, 133, 135, 136, 143, 144]
-
-
 class SimulationInitializer:
     @staticmethod
     def get_sim_ids(n_sims: int) -> List[int]:
@@ -35,23 +29,23 @@ class SimulationInitializer:
     @staticmethod
     def get_other_params() -> Tuple[int, int, int, float, float, float or None, int]:
         total_time_span = 10**2
-        block_time_span = 10
-        n_save_distribution_block = 10
-        support = 5
-        bin_size = 0.01
+        block_time_span = 5
+        n_save_distribution_block = 5
+        support = 3
+        bin_size = 0.005
         boundary = None
-        num_processes = 10
+        num_processes = 1
         return total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary, num_processes
 
     @staticmethod
     def get_other_params_test() -> Tuple[int, int, int, float, float, float or None, int]:
-        total_time_span = 8
-        block_time_span = 2
-        n_save_distribution_block = 2
+        total_time_span = 1
+        block_time_span = 1
+        n_save_distribution_block = 1
         support = 3
-        bin_size = 0.01
+        bin_size = 0.005
         boundary = None
-        num_processes = 10
+        num_processes = 1
         return total_time_span, n_save_distribution_block, block_time_span, support, bin_size, boundary, num_processes
 
     @staticmethod
@@ -80,8 +74,6 @@ class SimulationInitializer:
         methods = SimulationInitializer.get_methods()
         initial_distributions = SimulationInitializer.get_d0_parameters()
         n_sims = len(ts)*len(rs)*len(es)*len(initial_distributions)*len(methods)
-
-        # Up to here
 
         sim_ids = SimulationInitializer.get_sim_ids(n_sims=n_sims)
         simulation_parameters = []

@@ -1,7 +1,8 @@
 from Simulation.Distribution import Distribution
 from scipy.integrate import solve_ivp
 import numpy as np
-from Simulation.FastIntegration import parallelized_integral
+from Simulation.FastIntegration import vectorized_integral
+from typing import List
 
 
 class MasterEquation:
@@ -11,15 +12,20 @@ class MasterEquation:
         self.e = e
         self.d0 = d0
 
-    def solve(self, time_span: int, time_steps_save: int, method: str, num_processes: int):
-        def fun(time, p): return MasterEquation.f(time=time, p=p, t=self.t, e=self.e, r=self.r, d0=self.d0, num_processes=num_processes)
-        # solve_ivp complains it wants an Optional, but it works without a List too
+        rt = self.r * self.t
+        lb, ub = tuple(np.searchsorted(d0.bin_edges, np.array([-rt, rt])))
+        self.support_a = d0.bin_centers[lb:ub]
+        support_r_side = d0.bin_centers[ub:]
+        self.support_r = np.concatenate((-support_r_side[::-1], support_r_side))
+
+    def solve(self, time_span: int, time_steps_save: List[int], method: str):
+        def fun(time, p): return MasterEquation.f(time=time, p=p, support_a=self.support_a, support_r=self.support_r, e=self.e, r=self.r, d0=self.d0)
         res = solve_ivp(fun=fun, t_span=(0, time_span), y0=self.d0.bin_probs, t_eval=time_steps_save, method=method)
         return res
 
     @staticmethod
-    def f(time: float, p: np.ndarray, t: float, e: float, r: float, d0: Distribution, num_processes: int) -> np.ndarray:
-        res = parallelized_integral(x=d0.bin_centers, bin_probs=p, bin_edges=d0.bin_edges, t=t, e=e, r=r, support=d0.support, num_processes=num_processes)
+    def f(time: float, p: np.ndarray, support_a: np.ndarray, support_r: np.ndarray, e: float, r: float, d0: Distribution) -> np.ndarray:
+        res = vectorized_integral(x=d0.bin_centers, bin_probs=p, bin_edges=d0.bin_edges, bin_size=d0.bin_size, support_a=support_a, support_r=support_r, e=e, r=r)
         if d0.boundary is not None:
             res = MasterEquation.implement_boundary_condition(res=res, left_boundary_bin_index=d0.left_boundary_bin_index, right_boundary_bin_index=d0.right_boundary_bin_index, bin_size=d0.bin_size)
         return np.round(res, decimals=16)

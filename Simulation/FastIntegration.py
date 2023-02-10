@@ -1,7 +1,5 @@
 import numpy as np
-from scipy.integrate import quad_vec, quadrature
 from numba import jit
-from multiprocessing import Pool
 
 
 @jit(nopython=True)
@@ -26,25 +24,14 @@ def integrand_repulsion(a: np.ndarray, bin_probs: np.ndarray, bin_edges: np.ndar
     return np.power(2, -1 * np.abs(a) / r * e) * (t1 - t2)
 
 
-def evaluate_integral(x: np.ndarray, bin_probs: np.ndarray, bin_edges: np.ndarray, t: float, e: float, r: float,
-                      support: float) -> float:
-    rt = r * t
-    def i1(a: np.ndarray): return integrand_attraction(a=np.atleast_1d(a), bin_probs=bin_probs, bin_edges=bin_edges, x=x, e=e, r=r)
-    def i2(a: np.ndarray): return integrand_repulsion(a=np.atleast_1d(a), bin_probs=bin_probs, bin_edges=bin_edges, x=x, e=e, r=r)
-    result0, abserr0 = quad_vec(i1, a=-rt, b=rt)
-    result1, abserr1 = quad_vec(i2, a=rt, b=support)
-    result2, abserr2 = quad_vec(i2, a=-support, b=-rt)
-    return result0 + result1 + result2
+@jit(nopython=True)
+def evaluate_integral(x: np.ndarray, bin_probs: np.ndarray, bin_edges: np.ndarray, bin_size: float, support_a: np.ndarray, support_r: np.ndarray, e: float, r: float) -> float:
+    result0 = np.sum(integrand_attraction(a=support_a, bin_probs=bin_probs, bin_edges=bin_edges, x=x, e=e, r=r) * bin_size)
+    result1 = np.sum(integrand_repulsion(a=support_r, bin_probs=bin_probs, bin_edges=bin_edges, x=x, e=e, r=r) * bin_size)
+    return result0 + result1
 
 
-def vectorized_integral(x: np.ndarray, bin_probs: np.ndarray, bin_edges: np.ndarray, t: float, e: float, r: float, support: float) -> np.ndarray:
-    res = np.array([evaluate_integral(x=np.array([x_i]), bin_probs=bin_probs, bin_edges=bin_edges, t=t, e=e, r=r, support=support) for x_i in x])
+@jit(nopython=True)
+def vectorized_integral(x: np.ndarray, bin_probs: np.ndarray, bin_edges: np.ndarray, bin_size: float, support_a: np.ndarray, support_r: np.ndarray, e: float, r: float) -> np.ndarray:
+    res = np.array([evaluate_integral(x=np.array([x_i]), bin_probs=bin_probs, bin_edges=bin_edges, bin_size=bin_size, support_a=support_a, support_r=support_r, e=e, r=r) for x_i in x])
     return res
-
-
-def parallelized_integral(x: np.ndarray, bin_probs: np.ndarray, bin_edges: np.ndarray, t: float, e: float, r: float, support: float, num_processes: int) -> np.ndarray:
-    chunk_size = int(np.ceil(len(x) / num_processes))
-    chunks = [x[i:i + chunk_size] for i in range(0, len(x), chunk_size)]
-    with Pool(processes=num_processes) as pool:
-        res = pool.starmap(vectorized_integral, [(chunk, bin_probs, bin_edges, t, e, r, support) for chunk in chunks])
-    return np.concatenate(res)

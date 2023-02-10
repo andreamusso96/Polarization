@@ -26,8 +26,7 @@ class Simulator:
     def solve_block(self, current_t: int, current_d: Distribution):
         me = MasterEquation(t=self.params.t, r=self.params.r, e=self.params.e, d0=current_d)
         time_steps_save_distribution_block = self.get_time_steps_save_distributions_block(current_t=current_t)
-        res_scipy = me.solve(time_span=current_t + self.params.block_time_span,
-                             time_steps_save=time_steps_save_distribution_block, method=self.params.method, num_processes=self.params.num_processes)
+        res_scipy = me.solve(time_span=current_t + self.params.block_time_span, time_steps_save=time_steps_save_distribution_block, method=self.params.method)
         return res_scipy
 
     def get_current_d(self, res_scipy):
@@ -78,7 +77,7 @@ if __name__ == '__main__':
         p = SimulationParameters(sim_id=1, t=0.2, r=1, e=0.5, support=support, bin_size=bin_size, boundary=boundary,
                                       d0_parameters=dist_params,
                                       total_time_span=total_time_span, n_save_distributions_block=n_save_distributions_block,
-                                      block_time_span=block_time_span, method=method)
+                                      block_time_span=block_time_span, method=method, num_processes=1)
         return p
 
     def get_parameters_from_db():
