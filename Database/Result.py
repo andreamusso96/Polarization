@@ -9,7 +9,7 @@ import pandas as pd
 class DBResult:
     @staticmethod
     def get_simulation_result(conn: Connection, sim_id: int) -> SimulationResult:
-        params = DBParameters.get_simulation_parameters(conn=conn, sim_id=sim_id)
+        params = DBParameters.get_simulation_parameters(conn=conn, sim_ids=[sim_id])[0]
         distributions_table = GetTable.get_distributions_table(sim_id=sim_id)
         stmt_distributions = select(distributions_table)
         distributions_df = pd.read_sql_query(sql=stmt_distributions, con=conn)
