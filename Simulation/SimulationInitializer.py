@@ -58,7 +58,7 @@ class SimulationInitializer:
     @staticmethod
     def get_ts_rs_es_test() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         ts = np.array([0.4])
-        rs = np.array([0.8])
+        rs = np.array([1])
         es = np.array([0.5])
         return ts, rs, es
 
@@ -100,4 +100,4 @@ class SimulationInitializer:
 if __name__ == '__main__':
     from Database.Tables import CreateTable
     CreateTable.create_simulation_table()
-    SimulationInitializer.insert_simulation_parameters_in_db(test=False)
+    SimulationInitializer.insert_simulation_parameters_in_db(test=True)

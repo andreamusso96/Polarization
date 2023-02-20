@@ -2,6 +2,7 @@ from Simulation.Distribution import Distribution
 from scipy.integrate import solve_ivp
 import numpy as np
 from Simulation.FastIntegration import vectorized_integral
+from Simulation.Integration import vectorized_integral as vectorized_integral_simple
 from typing import List
 
 
@@ -20,7 +21,9 @@ class MasterEquation:
 
     def solve(self, time_span: int, time_steps_save: List[int], method: str):
         def fun(time, p): return MasterEquation.f(time=time, p=p, support_a=self.support_a, support_r=self.support_r, e=self.e, r=self.r, d0=self.d0)
-        res = solve_ivp(fun=fun, t_span=(0, time_span), y0=self.d0.bin_probs, t_eval=time_steps_save, method=method)
+        def fun1(time, p): return MasterEquation.f1(time=time, p=p, t=self.t, e=self.e, d0=self.d0)
+
+        res = solve_ivp(fun=fun1, t_span=(0, time_span), y0=self.d0.bin_probs, t_eval=time_steps_save, method=method)
         return res
 
     @staticmethod
@@ -29,6 +32,11 @@ class MasterEquation:
         if d0.boundary is not None:
             res = MasterEquation.implement_boundary_condition(res=res, left_boundary_bin_index=d0.left_boundary_bin_index, right_boundary_bin_index=d0.right_boundary_bin_index, bin_size=d0.bin_size)
         return np.round(res, decimals=16)
+
+    @staticmethod
+    def f1(time: float, p: np.ndarray, t:float, e: float, d0: Distribution):
+        res = vectorized_integral_simple(x=d0.bin_centers, bin_probs=p, bin_edges=d0.bin_edges, support=d0.support, t=t, e=e)
+        return res
 
     @staticmethod
     def implement_boundary_condition(res: np.ndarray, left_boundary_bin_index: int, right_boundary_bin_index: int, bin_size: float) -> np.ndarray:

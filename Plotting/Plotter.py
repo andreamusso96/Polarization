@@ -6,6 +6,7 @@ from Plotting.HeatMap import HeatMapPlotter, HeatMap
 from Plotting.SingleSimulation import SingleSimulationPlot
 from Database.DB import DB, ParameterRange, ParameterValue
 from typing import List
+import numpy as np
 
 
 class StabilityPlotter:
@@ -51,7 +52,7 @@ def get_sids_to_plot():
 def plot_results():
     from Database.Parameters import ParameterValue
     import numpy as np
-    ids = DB.get_ids_with_parameter_value(param_value=ParameterValue(name='complete', value=True))
+    ids = DB.get_sim_ids(param_values=[ParameterValue(name='r', value=1)])
     np_ids = np.array(ids)
     a1 = np.array([18, 27, 31, 32, 33, 34, 52, 53, 81, 96, 109, 111, 119, 127, 128, 129, 130, 133, 135, 136, 143, 144])
     a2temp = np_ids[np_ids < 2000]
@@ -94,6 +95,41 @@ def low_r():
     for i in ids:
         SingleSimulationPlotter.plot_result(sim_id=i)
 
+
+def plot_ups_and_downs():
+    dicts = []
+    for s in range(1, 169):
+        try:
+            sim_res = DB.get_simulation_result(sim_id=s)
+            df_0 = sim_res.distributions_df[sim_res.distributions_df.time == 0]
+            df_5 = sim_res.distributions_df[sim_res.distributions_df.time == 5]
+            m0 = np.max(df_0.dist_value.values)
+            m5 = np.max(df_5.dist_value.values)
+            if m5 > m0:
+                up_or_down = 1
+            else:
+                up_or_down = 0
+            a = {'t': sim_res.params.t, 'r': sim_res.params.r, 'e': sim_res.params.e, 'ud': up_or_down}
+            dicts.append(a)
+        except Exception as e:
+            print(e)
+
+    df = pd.DataFrame(dicts)
+    rs = np.unique(df.r.values)
+    hms = []
+    for r in rs:
+        d = df[df.r==r].drop(columns=['r'])
+        d = d.pivot('e','t', 'ud')
+        d.name = f'r={r}'
+        hms.append(d)
+
+    HeatMapPlotter.plot_heat_maps(heat_maps=hms)
+    return df
+
+def plot_r1():
+    ids = DB.get_sim_ids(param_values=[ParameterValue(name='r', value=1)])
+    for i in ids:
+        SingleSimulationPlotter.plot_result(sim_id=i)
+
 if __name__ == '__main__':
-    for s in range(1, 169, 10):
-        SingleSimulationPlotter.plot_result(sim_id=s)
+    SingleSimulationPlotter.plot_result(1)

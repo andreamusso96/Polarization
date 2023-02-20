@@ -15,6 +15,11 @@ class GetTable:
         return sim_table
 
     @staticmethod
+    def get_arm_simulation_table() -> Table:
+        sim_table = Table("arm_sim_table", metadata_obj, autoload_with=engine)
+        return sim_table
+
+    @staticmethod
     def get_simulation_statistics_table() -> Table:
         sim_stats = Table("sim_statistics", metadata_obj, autoload_with=engine)
         return sim_stats
@@ -56,6 +61,23 @@ class CreateTable:
                                  Column("success", Boolean))
         metadata_obj.create_all(bind=engine, tables=[simulation_table])
         return simulation_table
+
+    @staticmethod
+    def create_arm_simulation_table() -> Table:
+        arm_simulation_table = Table("arm_sim_table", metadata_obj,
+                                     Column("sim_id", Integer, primary_key=True),
+                                     Column("n", Integer),
+                                     Column("t", Float),
+                                     Column("r", Float),
+                                     Column("e", Float),
+                                     Column("mean", Float),
+                                     Column("std", Float),
+                                     Column("n_steps", Integer),
+                                     Column("b", Float),
+                                     Column("frequency_save", Integer),
+                                     Column("complete", Boolean))
+        metadata_obj.create_all(bind=engine, tables=[arm_simulation_table])
+        return arm_simulation_table
 
     @staticmethod
     def create_simulation_statistics_table() -> Table:

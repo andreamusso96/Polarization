@@ -17,7 +17,7 @@ class SimulationRunner:
         for p in params_sims_to_run:
             sim_id = p.sim_id
             if is_cluster:
-                time_in_mins = 20*60
+                time_in_mins = 8*60
                 cpus_per_task = p.num_processes
                 args_sim = ['sbatch', f'--time={time_in_mins}', f'--cpus-per-task={cpus_per_task}', f'--wrap="python -m main {str(sim_id)}"']
             else:

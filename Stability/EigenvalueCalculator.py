@@ -27,14 +27,13 @@ class EigenvalueCalculator:
     def get_eigenvalue2(self, k: int, diam: float):
         c = np.log(2) / (self.r * self.e)
         eps = self.r * self.t
-        def h1(beta): return EigenvalueCalculator.h(eps=0, phi=eps, beta=beta, c=c, omega=2*np.pi*k/diam)
+        def h1(beta): return EigenvalueCalculator.h(eps=0, phi=eps, beta=beta, c=c, omega=2 * np.pi *k / diam)
         def h2(beta): return EigenvalueCalculator.h(eps=eps, phi=diam/2, beta=beta, c=c, omega=2 * np.pi * k / diam)
 
         p1 = h1(beta=1) + h1(beta=1 - 1/self.r) - h1(beta=0) - h1(beta=1/self.r)
         p2 = h2(beta=1) + h2(beta=1 + 1/self.r) - h2(beta=0) - h2(beta=-1/self.r)
         eig = 1/diam * (p1 + p2)
         return eig
-        pass
 
     @staticmethod
     def h(eps: float, phi: float, beta: float, c: float, omega: float) -> float:

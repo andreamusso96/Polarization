@@ -88,4 +88,4 @@ class FastIntegrationTest(ProfilingTest):
 
 
 if __name__ == '__main__':
-    MasterEquationTest.profile(MasterEquationTest.speed_test())
+    MasterEquationTest.profile(MasterEquationTest.speed_test)

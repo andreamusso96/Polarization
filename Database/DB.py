@@ -6,10 +6,15 @@ from Database.Result import DBResult
 from Database.SimulationBookKeeping import BookKeeper
 from Database.HeatMaps import DBHeatMaps
 from Database.ResultStability import DBStability
+from Database.ParametersARM import DBParametersARM
+from Database.ResultARM import DBResultARM
+from Database.SimIdsARM import DBSimIdsARM
 from Simulation.Parameters import SimulationParameters
 from Simulation.SimulationResult import SimulationResult
 from Stability.StabilityAnalysis import StabilityResult
 from SimulationAnalysis.SimulationStatistics import SimulationStatistics
+from ARMSimulation.ARMParameters import ARMSimulationParameters
+from ARMSimulation.ARMResult import ARMSimulationResult
 from typing import List
 import pandas as pd
 from sqlalchemy import text
@@ -85,3 +90,30 @@ class DB:
     def get_heat_map_stability(x_axis: str, y_axis: str, z_val: str, f_name: str) -> pd.DataFrame:
         with engine.begin() as conn:
             return DBHeatMaps.get_heat_map_stability(conn=conn, x_axis=x_axis, y_axis=y_axis, z_val=z_val, f_name=f_name)
+
+    # ARM Parameters and Result
+    @staticmethod
+    def get_arm_sim_ids(incomplete: bool = False):
+        with engine.begin() as conn:
+            return DBSimIdsARM.get_sim_ids(conn=conn, incomplete=incomplete)
+
+    @staticmethod
+    def get_arm_parameters(sim_ids: List[int]) -> List[ARMSimulationParameters]:
+        with engine.begin() as conn:
+            return DBParametersARM.get_simulation_parameters(conn=conn, sim_ids=sim_ids)
+
+    @staticmethod
+    def insert_arm_parameters(params: ARMSimulationParameters):
+        with engine.begin() as conn:
+            DBParametersARM.insert_parameters(conn=conn, params=params)
+
+    @staticmethod
+    def get_arm_result(sim_id: int) -> ARMSimulationResult:
+        with engine.begin() as conn:
+            return DBResultARM.get_result(conn=conn, sim_id=sim_id)
+
+    @staticmethod
+    def insert_arm_result(arm_result: ARMSimulationResult):
+        with engine.begin() as conn:
+            DBResultARM.insert_arm_result_in_table(conn=conn, arm_simulation_result=arm_result)
+

@@ -7,12 +7,12 @@ from typing import Tuple, List
 class StabilityAnalysisRunner:
     @staticmethod
     def get_parameters_stability_analysis() -> Tuple[np.ndarray, np.ndarray, np.ndarray, int, float]:
-        num = 10
-        ts = np.linspace(0.1, 1, num=num)
-        rs = np.array([0.8]) # np.linspace(0.1, 1, num=num)
-        es = np.linspace(0.1, 1, num=num)
+        num = 100
+        diam = 10
+        ts = np.linspace(0.01, 1, num=num)
+        rs = np.array([1])
+        es = np.linspace(0.01, 1, num=num)
         max_frequency = 1000
-        diam = 1
         return ts, rs, es, max_frequency, diam
 
     @staticmethod
@@ -35,25 +35,8 @@ class StabilityAnalysisRunner:
             DB.insert_stability_result(stability_result=result)
 
 
-def plot_stability():
-    import pandas as pd
-    import plotly.graph_objects as go
-    results = StabilityAnalysisRunner.run_stability_analysis()
-    ds = []
-    for result in results:
-        d = {'t': result.t, 'e': result.e, 'stable': int(result.stable)}
-        ds.append(d)
-
-    df = pd.DataFrame(ds)
-    df = df.pivot(index='t', columns='e', values='stable')
-
-    fig = go.Figure()
-    trace = go.Heatmap(z=df.values, x=df.columns, y=df.index)
-    fig.add_trace(trace)
-    fig.update_xaxes(title_text='e')
-    fig.update_yaxes(title_text='t')
-    fig.show()
-
-
 if __name__ == '__main__':
-    plot_stability()
+    from Database.Tables import CreateTable
+    CreateTable.create_stability_table()
+    results = StabilityAnalysisRunner.run_stability_analysis()
+    StabilityAnalysisRunner.save_stability_analysis(results=results)
