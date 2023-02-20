@@ -7,9 +7,12 @@ import numpy as np
 class ARMInitializer:
     @staticmethod
     def get_sim_ids(n_sims: int) -> List[int]:
-        sim_ids = DB.get_arm_sim_ids()
-        next_id = sorted(sim_ids)[-1] + 1
-        return list(range(next_id, next_id + n_sims))
+        try:
+            last_sim_id = sorted(DB.get_sim_ids())[-1]
+        except IndexError as e:
+            last_sim_id = 0
+
+        return list(range(last_sim_id+1, last_sim_id+1+n_sims))
 
     @staticmethod
     def get_parameters() -> List[ARMSimulationParameters]:
