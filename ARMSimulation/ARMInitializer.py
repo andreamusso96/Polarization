@@ -8,7 +8,7 @@ class ARMInitializer:
     @staticmethod
     def get_sim_ids(n_sims: int) -> List[int]:
         try:
-            last_sim_id = sorted(DB.get_sim_ids())[-1]
+            last_sim_id = sorted(DB.get_arm_sim_ids())[-1]
         except IndexError as e:
             last_sim_id = 0
 
