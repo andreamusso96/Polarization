@@ -14,7 +14,7 @@ class ARMSimulationRunner:
     @staticmethod
     def run_simulations():
         params_sims_to_run = ARMSimulationRunner.get_params_incomplete_simulations()
-        batch_size = 500
+        batch_size = 401
         counter = 0
         for p in params_sims_to_run:
             if 0.09 < p.e < 0.11 or 0.29 < p.e < 0.31:
