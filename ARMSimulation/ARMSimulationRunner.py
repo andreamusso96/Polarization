@@ -14,17 +14,24 @@ class ARMSimulationRunner:
     @staticmethod
     def run_simulations():
         params_sims_to_run = ARMSimulationRunner.get_params_incomplete_simulations()
+        batch_size = 500
+        counter = 0
         for p in params_sims_to_run:
-            sim_id = p.sim_id
-            if is_cluster:
-                time_in_mins = 60
-                args_sim = ['sbatch', f'--time={time_in_mins}', f'--wrap="python -m main_arm {str(sim_id)}"']
-            else:
-                args_sim = ['python', '-m', 'main_arm', str(sim_id)]
+            if 0.09 < p.e < 0.11 or 0.029 < p.e < 0.031:
+                sim_id = p.sim_id
+                if is_cluster:
+                    time_in_mins = 60
+                    args_sim = ['sbatch', f'--time={time_in_mins}', f'--wrap="python -m main_arm {str(sim_id)}"']
+                else:
+                    args_sim = ['python', '-m', 'main_arm', str(sim_id)]
 
-            os.system(" ".join(args_sim))
-            print('SUBMITTED', sim_id, 'COMMAND', " ".join(args_sim))
-            time.sleep(0.5)
+                os.system(" ".join(args_sim))
+                print('SUBMITTED', sim_id, 'COMMAND', " ".join(args_sim))
+                time.sleep(0.5)
+                counter += 1
+
+            if counter % batch_size == 0:
+                time.sleep(600)
 
 
 if __name__ == '__main__':

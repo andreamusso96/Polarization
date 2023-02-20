@@ -21,7 +21,7 @@ from sqlalchemy import text
 
 
 class DB:
-    busy_timeout = 120*1000  # Time before sqlalchemy throws timeout error in milliseconds
+    busy_timeout = 10*60*1000  # Time before sqlalchemy throws timeout error in milliseconds
 
     # Bookkeeping
     @staticmethod
