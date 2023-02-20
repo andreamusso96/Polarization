@@ -42,6 +42,7 @@ class ARMInitializer:
                         p = ARMSimulationParameters(sim_id=sim_ids[c], n=n, t=t, r=r, e=e, mean=mean, std=std,
                                                     n_steps=n_steps, b=b, frequency_save=frequency_save)
                         parameter_list.append(p)
+                        c += 1
 
         return parameter_list
 
