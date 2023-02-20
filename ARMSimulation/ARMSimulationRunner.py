@@ -17,7 +17,7 @@ class ARMSimulationRunner:
         for p in params_sims_to_run:
             sim_id = p.sim_id
             if is_cluster:
-                time_in_mins = 20
+                time_in_mins = 60
                 args_sim = ['sbatch', f'--time={time_in_mins}', f'--wrap="python -m main_arm {str(sim_id)}"']
             else:
                 args_sim = ['python', '-m', 'main_arm', str(sim_id)]

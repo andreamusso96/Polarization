@@ -28,10 +28,10 @@ class SimulationInitializer:
 
     @staticmethod
     def get_other_params() -> Tuple[int, int, int, float, float, float or None, int]:
-        total_time_span = 10**2
+        total_time_span = 20
         block_time_span = 5
         n_save_distribution_block = 5
-        support = 3
+        support = 5
         bin_size = 0.005
         boundary = None
         num_processes = 1
@@ -50,9 +50,9 @@ class SimulationInitializer:
 
     @staticmethod
     def get_ts_rs_es() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        ts = np.linspace(0.1, 0.7, num=7)
-        rs = np.linspace(0.3, 1, num=8)
-        es = np.array([0.2, 0.5, 0.8])
+        ts = np.array([0.1, 0.2, 0.3, 0.5, 0.8])
+        rs = np.array([1])
+        es = np.array([0.1, 0.3, 0.5, 0.7, 0.9])
         return ts, rs, es
 
     @staticmethod
@@ -100,4 +100,4 @@ class SimulationInitializer:
 if __name__ == '__main__':
     from Database.Tables import CreateTable
     CreateTable.create_simulation_table()
-    SimulationInitializer.insert_simulation_parameters_in_db(test=True)
+    SimulationInitializer.insert_simulation_parameters_in_db(test=False)

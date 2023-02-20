@@ -16,12 +16,12 @@ class ARMInitializer:
         n = 1000
         ts = np.linspace(0.05, 1, 20)
         rs = np.linspace(0.05, 1, 20)
-        es = np.linspace(0.01, 1, 10)
+        es = np.linspace(0.1, 1, 10)
         mean = 0
         std = 0.2
         n_steps = 1000000
         bs = np.array([1, None])
-        frequency_save = 100
+        frequency_save = 1000
         parameter_list = ARMInitializer.make_parameter_list(n=n, ts=ts, rs=rs, es=es, mean=mean, std=std, n_steps=n_steps, bs=bs, frequency_save=frequency_save)
         return parameter_list
 
@@ -70,4 +70,4 @@ class ARMInitializer:
 if __name__ == '__main__':
     from Database.Tables import CreateTable
     CreateTable.create_arm_simulation_table()
-    ARMInitializer.initialize_simulations(test=True)
+    ARMInitializer.initialize_simulations(test=False)
