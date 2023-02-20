@@ -17,7 +17,7 @@ class ARMSimulationRunner:
         batch_size = 500
         counter = 0
         for p in params_sims_to_run:
-            if 0.09 < p.e < 0.11 or 0.029 < p.e < 0.031:
+            if 0.09 < p.e < 0.11 or 0.29 < p.e < 0.31:
                 sim_id = p.sim_id
                 if is_cluster:
                     time_in_mins = 60
