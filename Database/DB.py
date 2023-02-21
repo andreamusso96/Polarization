@@ -1,4 +1,5 @@
 from Database.Engine import engine
+from Database.Tables import GetTable
 from Database.Parameters import DBParameters, ParameterValue, ParameterRange
 from Database.SimIds import DBSimId
 from Database.SimulationStatistics import DBStatistics
@@ -8,7 +9,6 @@ from Database.HeatMaps import DBHeatMaps
 from Database.ResultStability import DBStability
 from Database.ParametersARM import DBParametersARM
 from Database.ResultARM import DBResultARM
-from Database.SimIdsARM import DBSimIdsARM
 from Simulation.Parameters import SimulationParameters
 from Simulation.SimulationResult import SimulationResult
 from Stability.StabilityAnalysis import StabilityResult
@@ -76,9 +76,9 @@ class DB:
 
     # SimID
     @staticmethod
-    def get_sim_ids(param_ranges: List[ParameterRange] = None, param_values: List[ParameterValue] = None, method: str = 'intersection') -> List[int]:
+    def get_sim_ids(arm: bool = False, param_ranges: List[ParameterRange] = None, param_values: List[ParameterValue] = None, method: str = 'intersection') -> List[int]:
         with engine.begin() as conn:
-            return DBSimId.get_sim_ids(conn=conn, param_ranges=param_ranges, param_values=param_values, method=method)
+            return DBSimId.get_sim_ids(conn=conn, arm=arm, param_ranges=param_ranges, param_values=param_values, method=method)
 
     # Heat maps
     @staticmethod
@@ -93,11 +93,6 @@ class DB:
 
     # ARM Parameters and Result
     @staticmethod
-    def get_arm_sim_ids(incomplete: bool = False):
-        with engine.begin() as conn:
-            return DBSimIdsARM.get_sim_ids(conn=conn, incomplete=incomplete)
-
-    @staticmethod
     def get_arm_parameters(sim_ids: List[int]) -> List[ARMSimulationParameters]:
         with engine.begin() as conn:
             return DBParametersARM.get_simulation_parameters(conn=conn, sim_ids=sim_ids)
@@ -108,6 +103,11 @@ class DB:
             DBParametersARM.insert_parameters(conn=conn, params=params)
 
     @staticmethod
+    def delete_arm_params(sim_ids: List[int]) -> None:
+        with engine.begin() as conn:
+            DBParametersARM.delete_parameters(conn=conn, sim_ids=sim_ids)
+
+    @staticmethod
     def get_arm_result(sim_id: int) -> ARMSimulationResult:
         with engine.begin() as conn:
             return DBResultARM.get_result(conn=conn, sim_id=sim_id)
@@ -115,5 +115,10 @@ class DB:
     @staticmethod
     def insert_arm_result(arm_result: ARMSimulationResult):
         with engine.begin() as conn:
+            conn.execute(text(f"PRAGMA busy_timeout = {DB.busy_timeout}"))
             DBResultARM.insert_arm_result_in_table(conn=conn, arm_simulation_result=arm_result)
 
+    # Tables
+    @staticmethod
+    def get_all_table_names() -> List[str]:
+        return GetTable.get_all_table_names()

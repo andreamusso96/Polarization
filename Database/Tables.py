@@ -1,6 +1,6 @@
 from Database.Engine import engine, metadata_obj
-from sqlalchemy import Column, Table, Float, Integer, String, Boolean
-
+from sqlalchemy import Column, Table, Float, Integer, String, Boolean, inspect
+from typing import List
 
 class TableNames:
     sim_table = "sim_table"
@@ -38,6 +38,11 @@ class GetTable:
     def get_table(table_name: str) -> Table:
         table = Table(table_name, metadata_obj, autoload_with=engine)
         return table
+
+    @staticmethod
+    def get_all_table_names() -> List[str]:
+        inspector = inspect(engine)
+        return inspector.get_table_names()
 
 
 class CreateTable:
@@ -112,7 +117,6 @@ class CreateTable:
                                     Column("dist_value", Float))
         metadata_obj.create_all(bind=engine, tables=[distributions_table])
         return distributions_table
-
 
 if __name__ == '__main__':
     CreateTable.create_stability_table()

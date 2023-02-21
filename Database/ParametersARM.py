@@ -1,7 +1,7 @@
 from ARMSimulation.ARMParameters import ARMSimulationParameters
 from Database.Tables import GetTable
 from typing import List
-from sqlalchemy import select, insert
+from sqlalchemy import select, insert, delete
 from sqlalchemy.engine import Connection
 
 
@@ -26,4 +26,10 @@ class DBParametersARM:
     def insert_parameters(conn: Connection, params: ARMSimulationParameters):
         arm_sim_table = GetTable.get_arm_simulation_table()
         stmt = insert(arm_sim_table).values(sim_id=params.sim_id, n=params.n, t=params.t, r=params.r, e=params.e, mean=params.mean, std=params.std, n_steps=params.n_steps, b=params.b, frequency_save=params.frequency_save, complete=False)
+        conn.execute(stmt)
+
+    @staticmethod
+    def delete_parameters(conn: Connection, sim_ids: List[int]):
+        arm_sim_table = GetTable.get_arm_simulation_table()
+        stmt = delete(arm_sim_table).where(arm_sim_table.c.sim_id.in_(sim_ids))
         conn.execute(stmt)

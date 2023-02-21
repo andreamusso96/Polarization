@@ -7,17 +7,25 @@ from typing import List
 
 class DBSimId:
     @staticmethod
-    def get_sim_ids(conn: Connection, param_ranges: List[ParameterRange] = None, param_values: List[ParameterValue] = None, method: str = 'intersection') -> List[int]:
-        sim_table = GetTable.get_simulation_table()
-        if param_ranges is None and param_values is None:
-            stmt = select(sim_table.c.sim_id)
-        elif param_ranges is None and param_values is not None:
-            stmt = DBSimId._set_operations_on_statements(stmts=DBSimId._get_stmts_for_parameter_values(sim_table=sim_table,param_values=param_values), method=method)
-        elif param_ranges is not None and param_values is None:
-            stmt = DBSimId._set_operations_on_statements(stmts=DBSimId._get_stmts_for_parameter_ranges(sim_table=sim_table, param_ranges=param_ranges), method=method)
+    def get_sim_ids(conn: Connection, arm: bool = False, param_ranges: List[ParameterRange] = None, param_values: List[ParameterValue] = None, method: str = 'intersection') -> List[int]:
+        if not arm:
+            table = GetTable.get_simulation_table()
         else:
-            stmts_param_ranges = DBSimId._get_stmts_for_parameter_ranges(param_ranges=param_ranges)
-            stmts_param_values = DBSimId._get_stmts_for_parameter_values(param_values=param_values)
+            table = GetTable.get_arm_simulation_table()
+
+        if param_ranges is None and param_values is None:
+            stmt = select(table.c.sim_id)
+        elif param_ranges is None and param_values is not None:
+            stmt = DBSimId._set_operations_on_statements(
+                stmts=DBSimId._get_stmts_for_parameter_values(sim_table=table, param_values=param_values),
+                method=method)
+        elif param_ranges is not None and param_values is None:
+            stmt = DBSimId._set_operations_on_statements(
+                stmts=DBSimId._get_stmts_for_parameter_ranges(sim_table=table, param_ranges=param_ranges),
+                method=method)
+        else:
+            stmts_param_ranges = DBSimId._get_stmts_for_parameter_ranges(sim_table=table, param_ranges=param_ranges)
+            stmts_param_values = DBSimId._get_stmts_for_parameter_values(sim_table=table, param_values=param_values)
             stmt = DBSimId._set_operations_on_statements(stmts=stmts_param_ranges + stmts_param_values, method=method)
 
         ids = conn.execute(stmt).scalars().all()

@@ -8,7 +8,7 @@ class ARMInitializer:
     @staticmethod
     def get_sim_ids(n_sims: int) -> List[int]:
         try:
-            last_sim_id = sorted(DB.get_arm_sim_ids())[-1]
+            last_sim_id = sorted(DB.get_sim_ids(arm=True))[-1]
         except IndexError as e:
             last_sim_id = 0
 
@@ -19,7 +19,7 @@ class ARMInitializer:
         n = 1000
         ts = np.linspace(0.05, 1, 20)
         rs = np.linspace(0.05, 1, 20)
-        es = np.linspace(0.1, 1, 10)
+        es = np.array([0.1, 0.3])
         mean = 0
         std = 0.2
         n_steps = 1000000
