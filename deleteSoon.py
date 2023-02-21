@@ -94,4 +94,4 @@ def refactor_db6():
 
 
 if __name__ == '__main__':
-    get_table_names()
+    run()
