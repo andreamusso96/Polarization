@@ -107,6 +107,17 @@ class SimulationOutputAnalyser:
 
 
 if __name__ == '__main__':
-    analyser = SimulationOutputAnalyser(min_job_id=7800000)
+    import numpy as np
+    analyser = SimulationOutputAnalyser(min_job_id=103*10**5)
     t = analyser.get_termination_reasons()
     print(t.head())
+    fnames = []
+    for name in t.file_name:
+        fnames.append(name.split('-')[-1].replace('.out', ''))
+
+    fnames = [int(name) for name in fnames]
+    np.save(np.array(fnames), 'fnames.npy')
+
+    a = 0
+
+

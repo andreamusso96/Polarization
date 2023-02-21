@@ -127,9 +127,30 @@ def plot_ups_and_downs():
     return df
 
 def plot_r1():
-    ids = DB.get_sim_ids(param_values=[ParameterValue(name='r', value=1)])
+    ids = DB.get_sim_ids()
     for i in ids:
         SingleSimulationPlotter.plot_result(sim_id=i)
 
+def plot_arm():
+    ids = DB.get_arm_sim_ids()
+    params = DB.get_arm_parameters(sim_ids=ids)
+    counter = 0
+    for p in params:
+        if 0.09 < p.e < 0.11 or 0.29 < p.e < 0.31:
+            sim_id = p.sim_id
+            counter += 1
+
+
+    print('TOTAL', counter)
+
+
+def plot_sims():
+    ids = DB.get_sim_ids(param_values=[ParameterValue(name='complete', value=True)])
+    ids_all = DB.get_sim_ids()
+    print(len(ids_all) - len(ids))
+
+
+d
+
 if __name__ == '__main__':
-    SingleSimulationPlotter.plot_result(1)
+    plot_sims()
