@@ -130,6 +130,7 @@ class DB:
     @staticmethod
     def insert_arm_statistics(arm_statistics: ARMStatistics) -> None:
         with engine.begin() as conn:
+            conn.execute(text(f"PRAGMA busy_timeout = {DB.busy_timeout}"))
             DBStatisticsARM.insert_arm_statistics(conn=conn, arm_statistics=arm_statistics)
     # Tables
     @staticmethod

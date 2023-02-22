@@ -58,4 +58,4 @@ class PlotARM:
 
 
 if __name__ == '__main__':
-    PlotARM.plot_arm_result(sim_id=1)
+    PlotARM.plot_arm_result(sim_id=965)

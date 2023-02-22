@@ -103,10 +103,12 @@ def update_arm_stats():
         for sim_id in sim_ids:
             result = DB.get_arm_result(sim_id=sim_id)
             end_var = result.get_normalized_variance_last_step()
-            update(table).where(table.c.sim_id == sim_id).values(end_variance=end_var)
+            stmt = update(table).where(table.c.sim_id == sim_id).values(end_variance=end_var)
+            conn.execute(stmt)
 
         conn.commit()
 
 
+
 if __name__ == '__main__':
-    update_arm_stats()
+    refactor_db4()

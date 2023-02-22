@@ -38,8 +38,7 @@ class FigureARMSimulation:
         xaxis, yaxis = 't', 'r'
         sim_ids = DB.get_sim_ids(arm=True, param_values=[ParameterValue(name='e', value=self.e), ParameterValue(name='b', value=boundary)])
         arm_stats_df = DB.get_arm_statistics(sim_ids=sim_ids)
-        arm_stats_df_e = arm_stats_df[arm_stats_df['e'] == self.e]
-        heat_map_df = arm_stats_df_e.pivot(index=yaxis, columns=xaxis, values='end_variance')
+        heat_map_df = arm_stats_df.pivot(index=yaxis, columns=xaxis, values='end_variance')
         trace = self._get_plotly_heat_map_trace(heat_map_df=heat_map_df, showscale=showscale, colorbar=colorbar)
         self.fig.add_trace(trace, row=row, col=col)
 
@@ -54,20 +53,7 @@ class FigureARMSimulation:
                            colorbar=colorbar)
         return trace
 
-    @staticmethod
-    def get_heat_map_df(sim_ids: List[int], x_axis: str, y_axis: str):
-        dicts = []
-        for sim_id in sim_ids:
-            result = DB.get_arm_result(sim_id=sim_id)
-            normalized_variance = result.get_normalized_variance_last_step()
-            d = {x_axis: getattr(result.sim_params, x_axis), y_axis: getattr(result.sim_params, y_axis), 'var': normalized_variance}
-            dicts.append(d)
-
-        df = pd.DataFrame(dicts)
-        df = df.pivot(index=y_axis, columns=x_axis, values='var')
-        return df
-
 
 if __name__ == '__main__':
-    fig = FigureARMSimulation(e=0.3)
+    fig = FigureARMSimulation(e=0.1)
     fig.make_plot()

@@ -10,18 +10,10 @@ class ARMSimulationRunner:
     def get_sim_id_batches():
         batch_size = 80
         ids_incomplete_simulations = DB.get_sim_ids(arm=True, param_values=[ParameterValue(name='complete', value=False)])
-        n_sims = len(ids_incomplete_simulations)
-        n_batches = int(np.ceil(n_sims / batch_size))
-        batches = []
-        for batch_number in range(n_batches):
-            batch_start = batch_number * batch_size
-            batch_start_end = min((batch_number + 1) * batch_size, n_sims + 1)
-            ids_batch = ids_incomplete_simulations[batch_start:batch_start_end]
-            sorted_ids_batch = sorted(ids_batch)
-            batches.append((sorted_ids_batch[0], sorted_ids_batch[-1]))
-        # The last batch we need to get the last sim id
-        batches[-1] = (batches[-1][0], batches[-1][1] + 1)
-        return batches
+        n_batches = int(np.ceil(len(ids_incomplete_simulations) / batch_size))
+        complete_batches = np.array_split(ids_incomplete_simulations, n_batches)
+        ends_batches = [(batch[0], batch[-1] + 1) for batch in complete_batches]
+        return ends_batches
 
     @staticmethod
     def run_simulations():

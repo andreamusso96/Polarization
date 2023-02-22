@@ -10,7 +10,10 @@ class DBStatisticsARM:
     @staticmethod
     def get_arm_statistics(conn: Connection, sim_ids: List[int]) -> pd.DataFrame:
         arm_statistics_table = GetTable.get_arm_statistics_table()
-        stmt = select(arm_statistics_table).where(arm_statistics_table.c.sim_id.in_(sim_ids))
+        arm_sim_table = GetTable.get_arm_simulation_table()
+        stmt = select(arm_statistics_table, arm_sim_table).join(arm_statistics_table,
+                                                                arm_statistics_table.c.sim_id == arm_sim_table.c.sim_id).filter(
+            arm_statistics_table.c.sim_id.in_(sim_ids))
         df = pd.read_sql(con=conn, sql=stmt)
         return df
 

@@ -25,13 +25,13 @@ class ARMSimulationResult:
         result['step'] = self.time_steps
         return result
 
-    def get_normalized_variance_last_step(self):
-        last_step = self.states[-1]
-        min_last_step = np.min(last_step)
-        max_last_step = np.max(last_step)
-        max_possible_variance = (max_last_step - min_last_step) ** 2
-        var_last_step = np.var(last_step)
-        if np.round(var_last_step, decimals=1) == 0:
+    def get_normalized_variance_final_opinion_distribution(self):
+        final_opinion_distribution = self.states[-1]
+        min_opinion = np.min(final_opinion_distribution)
+        max_opinion = np.max(final_opinion_distribution)
+        max_variance_opinion_distribution = ((max_opinion - min_opinion) ** 2)/4
+        variance_opinion_distribution = np.var(final_opinion_distribution)
+        if np.round(variance_opinion_distribution, decimals=2) == 0:
             return 0
         else:
-            return var_last_step / max_possible_variance
+            return variance_opinion_distribution / max_variance_opinion_distribution
