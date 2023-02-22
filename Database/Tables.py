@@ -25,6 +25,11 @@ class GetTable:
         return sim_stats
 
     @staticmethod
+    def get_arm_statistics_table() -> Table:
+        sim_table = Table("arm_stats_table", metadata_obj, autoload_with=engine)
+        return sim_table
+
+    @staticmethod
     def get_stability_stable() -> Table:
         stability_table = Table("stability", metadata_obj, autoload_with=engine)
         return stability_table
@@ -83,6 +88,14 @@ class CreateTable:
                                      Column("complete", Boolean))
         metadata_obj.create_all(bind=engine, tables=[arm_simulation_table])
         return arm_simulation_table
+
+    @staticmethod
+    def create_arm_statistics_table() -> Table:
+        arm_end_variance = Table("arm_stats_table", metadata_obj,
+                                     Column("sim_id", Integer, primary_key=True),
+                                     Column("end_variance", Float))
+        metadata_obj.create_all(bind=engine, tables=[arm_end_variance])
+        return arm_end_variance
 
     @staticmethod
     def create_simulation_statistics_table() -> Table:

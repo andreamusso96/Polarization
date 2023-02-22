@@ -9,12 +9,14 @@ from Database.HeatMaps import DBHeatMaps
 from Database.ResultStability import DBStability
 from Database.ParametersARM import DBParametersARM
 from Database.ResultARM import DBResultARM
+from Database.StatisticsARM import DBStatisticsARM
 from Simulation.Parameters import SimulationParameters
 from Simulation.SimulationResult import SimulationResult
 from Stability.StabilityAnalysis import StabilityResult
 from SimulationAnalysis.SimulationStatistics import SimulationStatistics
 from ARMSimulation.ARMParameters import ARMSimulationParameters
 from ARMSimulation.ARMResult import ARMSimulationResult
+from ARMSimulation.ARMStatistics import ARMStatistics
 from typing import List
 import pandas as pd
 from sqlalchemy import text
@@ -91,7 +93,7 @@ class DB:
         with engine.begin() as conn:
             return DBHeatMaps.get_heat_map_stability(conn=conn, x_axis=x_axis, y_axis=y_axis, z_val=z_val, f_name=f_name)
 
-    # ARM Parameters and Result
+    # ARM Parameters
     @staticmethod
     def get_arm_parameters(sim_ids: List[int]) -> List[ARMSimulationParameters]:
         with engine.begin() as conn:
@@ -107,6 +109,7 @@ class DB:
         with engine.begin() as conn:
             DBParametersARM.delete_parameters(conn=conn, sim_ids=sim_ids)
 
+    # ARM Results
     @staticmethod
     def get_arm_result(sim_id: int) -> ARMSimulationResult:
         with engine.begin() as conn:
@@ -118,6 +121,16 @@ class DB:
             conn.execute(text(f"PRAGMA busy_timeout = {DB.busy_timeout}"))
             DBResultARM.insert_arm_result_in_table(conn=conn, arm_simulation_result=arm_result)
 
+    # ARM Statistics
+    @staticmethod
+    def get_arm_statistics(sim_ids: List[int]) -> pd.DataFrame:
+        with engine.begin() as conn:
+            return DBStatisticsARM.get_arm_statistics(conn=conn, sim_ids=sim_ids)
+
+    @staticmethod
+    def insert_arm_statistics(arm_statistics: ARMStatistics) -> None:
+        with engine.begin() as conn:
+            DBStatisticsARM.insert_arm_statistics(conn=conn, arm_statistics=arm_statistics)
     # Tables
     @staticmethod
     def get_all_table_names() -> List[str]:

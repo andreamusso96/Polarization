@@ -150,7 +150,6 @@ def plot_sims():
     print(len(ids_all) - len(ids))
 
 
-d
 
 if __name__ == '__main__':
-    plot_sims()
+    plot_r1()

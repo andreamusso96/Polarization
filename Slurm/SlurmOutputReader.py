@@ -108,7 +108,7 @@ class SimulationOutputAnalyser:
 
 if __name__ == '__main__':
     import numpy as np
-    analyser = SimulationOutputAnalyser(min_job_id=104*10**5)
+    analyser = SimulationOutputAnalyser(min_job_id=1041*10**4)
     analyser.print_termination_reasons()
     t = analyser.get_termination_reasons()
     print(t.head())

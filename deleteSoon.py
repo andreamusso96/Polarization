@@ -92,6 +92,21 @@ def refactor_db6():
         conn.commit()
 
 
+def update_arm_stats():
+    from Database.DB import GetTable, engine
+    from sqlalchemy import update
+    arm_stats = DB.get_arm_statistics(sim_ids=DB.get_sim_ids(arm=True))
+    bad_arm_stats = arm_stats[arm_stats.end_variance > 1]
+    sim_ids = [int(a) for a in bad_arm_stats.sim_id]
+    table = GetTable.get_arm_statistics_table()
+    with engine.begin() as conn:
+        for sim_id in sim_ids:
+            result = DB.get_arm_result(sim_id=sim_id)
+            end_var = result.get_normalized_variance_last_step()
+            update(table).where(table.c.sim_id == sim_id).values(end_variance=end_var)
+
+        conn.commit()
+
 
 if __name__ == '__main__':
-    run()
+    update_arm_stats()

@@ -24,3 +24,14 @@ class ARMSimulationResult:
         result = pd.DataFrame(self.states, columns=list(range(0, self.sim_params.n)))
         result['step'] = self.time_steps
         return result
+
+    def get_normalized_variance_last_step(self):
+        last_step = self.states[-1]
+        min_last_step = np.min(last_step)
+        max_last_step = np.max(last_step)
+        max_possible_variance = (max_last_step - min_last_step) ** 2
+        var_last_step = np.var(last_step)
+        if np.round(var_last_step, decimals=1) == 0:
+            return 0
+        else:
+            return var_last_step / max_possible_variance
