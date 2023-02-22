@@ -113,6 +113,7 @@ class DB:
     @staticmethod
     def get_arm_result(sim_id: int) -> ARMSimulationResult:
         with engine.begin() as conn:
+            conn.execute(text(f"PRAGMA busy_timeout = {DB.busy_timeout}"))
             return DBResultARM.get_result(conn=conn, sim_id=sim_id)
 
     @staticmethod

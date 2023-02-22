@@ -1,3 +1,5 @@
+import time
+
 from Database.DB import DB
 import numpy as np
 from config import is_cluster
@@ -25,9 +27,12 @@ class ARMStatisticsRunner:
                 args_sim = ['python', '-m', 'main_arm_stats', str(batch[0]), str(batch[1])]
 
             os.system(" ".join(args_sim))
+            time.sleep(1)
 
 
 if __name__ == '__main__':
-    from Database.Tables import CreateTable
-    CreateTable.create_arm_statistics_table()
-    ARMStatisticsRunner.run()
+    from Database.Tables import CreateTable, GetTable
+    from Database.Engine import engine
+    GetTable.get_arm_statistics_table().drop(engine)
+    #CreateTable.create_arm_statistics_table()
+    #ARMStatisticsRunner.run()
