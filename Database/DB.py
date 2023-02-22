@@ -80,6 +80,7 @@ class DB:
     @staticmethod
     def get_sim_ids(arm: bool = False, param_ranges: List[ParameterRange] = None, param_values: List[ParameterValue] = None, method: str = 'intersection') -> List[int]:
         with engine.begin() as conn:
+            conn.execute(text(f"PRAGMA busy_timeout = {DB.busy_timeout}"))
             return DBSimId.get_sim_ids(conn=conn, arm=arm, param_ranges=param_ranges, param_values=param_values, method=method)
 
     # Heat maps
