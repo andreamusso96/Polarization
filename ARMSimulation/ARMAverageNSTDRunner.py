@@ -18,7 +18,7 @@ class ARMAverageNSTDRunner:
         sim_ids = ARMAverageNSTDRunner.get_sim_ids()
         for sid in sim_ids:
             if is_cluster:
-                time_in_mins = 60
+                time_in_mins = 50
                 args_sim = ['sbatch', f'--time={time_in_mins}', f'--wrap="python -m main_avg_nstd {str(sid)}"']
             else:
                 args_sim = ['python', '-m', 'main_avg_nstd', str(sid)]
