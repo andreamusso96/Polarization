@@ -9,7 +9,9 @@ class ARMAverageNSTDInitializer:
     @staticmethod
     def get_sim_ids(n_sims: int) -> List[int]:
         try:
-            last_sim_id = sorted(DB.get_sim_ids(arm=True))[-1]
+            df = DB.get_average_nstd_table()
+            sim_ids = list(df['sim_id'].values)
+            last_sim_id = sorted(sim_ids)[-1]
         except IndexError as e:
             last_sim_id = 0
 
