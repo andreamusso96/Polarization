@@ -76,3 +76,24 @@ class DistributionGenerator:
         bin_probs = uniform_rv.pdf(bin_edges[1:])
         d = Distribution(bin_probs=bin_probs, bin_edges=bin_edges, boundary=boundary)
         return d
+
+    @staticmethod
+    def bipolar(support: float, bin_size: float, dp: DistributionParameters, boundary: float) -> Distribution:
+        bin_edges = DistributionGenerator.get_bins(support=support, bin_size=bin_size)
+        loc1, scale1 = dp.params['loc1'], dp.params['scale1']
+        loc2, scale2 = dp.params['loc2'], dp.params['scale2']
+        norm_rv1 = norm(loc=loc1, scale=scale1)
+        norm_rv2 = norm(loc=loc2, scale=scale2)
+        bin_probs = 0.5 * (norm_rv1.pdf(bin_edges[1:]) + norm_rv2.pdf(bin_edges[1:]))
+        d = Distribution(bin_probs=bin_probs, bin_edges=bin_edges, boundary=boundary)
+        return d
+
+if __name__ == '__main__':
+    import matplotlib.pyplot as plt
+    support = 3
+    bin_size = 0.1
+    dp = DistributionParameters(name='bipolar', params={'loc1': 1, 'scale1': 0.2, 'loc2': -1, 'scale2': 0.2})
+    d = DistributionGenerator.get_distribution(support=support, bin_size=bin_size, dist_params=dp, boundary=None)
+    plt.plot(d.bin_centers, d.bin_probs)
+    print(np.sum(d.bin_probs * d.bin_size))
+    plt.show()

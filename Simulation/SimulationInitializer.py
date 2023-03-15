@@ -22,9 +22,9 @@ class SimulationInitializer:
 
     @staticmethod
     def get_d0_parameters() -> List[DistributionParameters]:
-        params = {'loc': 0, 'scale': 0.2}
-        d0_params_normal = DistributionParameters(name='normal', params=params)
-        return [d0_params_normal]
+        d0_params_bipolar = DistributionParameters(name='bipolar', params={'loc1': 1, 'scale1': 0.2, 'loc2': -1, 'scale2': 0.2})
+        d0_params_normal = DistributionParameters(name='normal', params={'loc': 0, 'scale': 0.2})
+        return [d0_params_normal, d0_params_bipolar]
 
     @staticmethod
     def get_other_params() -> Tuple[int, int, int, float, float, float or None, int]:
@@ -39,10 +39,10 @@ class SimulationInitializer:
 
     @staticmethod
     def get_other_params_test() -> Tuple[int, int, int, float, float, float or None, int]:
-        total_time_span = 1
-        block_time_span = 1
-        n_save_distribution_block = 1
-        support = 3
+        total_time_span = 300
+        block_time_span = 5
+        n_save_distribution_block = 5
+        support = 5
         bin_size = 0.005
         boundary = None
         num_processes = 1
@@ -57,9 +57,9 @@ class SimulationInitializer:
 
     @staticmethod
     def get_ts_rs_es_test() -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-        ts = np.array([0.4])
+        ts = np.array([0.2])
         rs = np.array([1])
-        es = np.array([0.5])
+        es = np.array([0.1])
         return ts, rs, es
 
     @staticmethod
@@ -97,7 +97,19 @@ class SimulationInitializer:
             DB.setup_database_for_simulation(params=sim_param)
 
 
+def check_db():
+    from Database.Tables import CreateTable, GetTable
+    # CreateTable.create_simulation_table()
+    # SimulationInitializer.insert_simulation_parameters_in_db(test=True)
+    from Database.DB import engine
+    from sqlalchemy import select
+    import pandas as pd
+
+    with engine.begin() as conn:
+        table = GetTable.get_simulation_table()
+        stmt = select(table)
+        df = pd.read_sql(con=conn, sql=stmt)
+
+    return df
 if __name__ == '__main__':
-    from Database.Tables import CreateTable
-    CreateTable.create_simulation_table()
-    SimulationInitializer.insert_simulation_parameters_in_db(test=False)
+    SimulationInitializer.insert_simulation_parameters_in_db(test=True)

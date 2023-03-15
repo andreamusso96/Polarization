@@ -33,6 +33,6 @@ class ARMStatisticsRunner:
 if __name__ == '__main__':
     from Database.Tables import CreateTable, GetTable
     from Database.Engine import engine
-    #GetTable.get_arm_statistics_table().drop(engine)
-    CreateTable.create_arm_statistics_table()
-    ARMStatisticsRunner.run()
+    #GetTable.get_arm_statistics_table().drop(engine)Sky
+    #CreateTable.create_arm_statistics_table()
+    #ARMStatisticsRunner.run()

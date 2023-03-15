@@ -2,6 +2,7 @@ from Database.Engine import engine, metadata_obj
 from sqlalchemy import Column, Table, Float, Integer, String, Boolean, inspect
 from typing import List
 
+
 class TableNames:
     sim_table = "sim_table"
     sim_statistics = "sim_statistics"
@@ -33,6 +34,11 @@ class GetTable:
     def get_stability_stable() -> Table:
         stability_table = Table("stability", metadata_obj, autoload_with=engine)
         return stability_table
+
+    @staticmethod
+    def get_average_nstd_table() -> Table:
+        average_nstd_table = Table("avg_nstd", metadata_obj, autoload_with=engine)
+        return average_nstd_table
 
     @staticmethod
     def get_distributions_table(sim_id: int) -> Table:
@@ -92,8 +98,8 @@ class CreateTable:
     @staticmethod
     def create_arm_statistics_table() -> Table:
         arm_end_variance = Table("arm_stats_table", metadata_obj,
-                                     Column("sim_id", Integer, primary_key=True),
-                                     Column("end_variance", Float))
+                                 Column("sim_id", Integer, primary_key=True),
+                                 Column("end_variance", Float))
         metadata_obj.create_all(bind=engine, tables=[arm_end_variance])
         return arm_end_variance
 
@@ -121,6 +127,26 @@ class CreateTable:
         return stability_table
 
     @staticmethod
+    def create_average_nstd_table() -> Table:
+        average_nstd_table = Table("avg_nstd", metadata_obj,
+                                   Column("sim_id", Integer, primary_key=True),
+                                   Column("n", Integer),
+                                   Column("t", Float),
+                                   Column("r", Float),
+                                   Column("e", Float),
+                                   Column("mean", Float),
+                                   Column("std", Float),
+                                   Column("n_steps", Integer),
+                                   Column("b", Float),
+                                   Column("frequency_save", Integer),
+                                   Column("complete", Boolean),
+                                   Column("n_runs", Integer),
+                                   Column("nstd_mean", Float),
+                                   Column("nstd_std", Float))
+        metadata_obj.create_all(bind=engine, tables=[average_nstd_table])
+        return average_nstd_table
+
+    @staticmethod
     def create_distributions_table(sim_id: int) -> Table:
         distributions_table = Table(f"distributions_{sim_id}",
                                     metadata_obj,
@@ -130,6 +156,7 @@ class CreateTable:
                                     Column("dist_value", Float))
         metadata_obj.create_all(bind=engine, tables=[distributions_table])
         return distributions_table
+
 
 if __name__ == '__main__':
     CreateTable.create_stability_table()

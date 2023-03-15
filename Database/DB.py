@@ -10,6 +10,7 @@ from Database.ResultStability import DBStability
 from Database.ParametersARM import DBParametersARM
 from Database.ResultARM import DBResultARM
 from Database.StatisticsARM import DBStatisticsARM
+from Database.AverageNSTD import DBAverageNSTD
 from Simulation.Parameters import SimulationParameters
 from Simulation.SimulationResult import SimulationResult
 from Stability.StabilityAnalysis import StabilityResult
@@ -17,6 +18,8 @@ from SimulationAnalysis.SimulationStatistics import SimulationStatistics
 from ARMSimulation.ARMParameters import ARMSimulationParameters
 from ARMSimulation.ARMResult import ARMSimulationResult
 from ARMSimulation.ARMStatistics import ARMStatistics
+from ARMSimulation.ARMAverageNSTDResult import ARMAverageNSTDResult
+from ARMSimulation.ARMAverageNSTDParams import ARMAverageNSTDParams
 from typing import List
 import pandas as pd
 from sqlalchemy import text
@@ -138,3 +141,24 @@ class DB:
     @staticmethod
     def get_all_table_names() -> List[str]:
         return GetTable.get_all_table_names()
+
+    # Average NSTD
+    @staticmethod
+    def get_average_nstd_table() -> pd.DataFrame:
+        with engine.begin() as conn:
+            return DBAverageNSTD.get_average_nstd_table(conn=conn)
+
+    @staticmethod
+    def get_average_nstd_params(sim_id: int) -> ARMAverageNSTDParams:
+        with engine.begin() as conn:
+            return DBAverageNSTD.get_average_nstd_params(conn=conn, sim_id=sim_id)
+
+    @staticmethod
+    def insert_average_nstd_params(average_nstd_params: ARMAverageNSTDParams):
+        with engine.begin() as conn:
+            DBAverageNSTD.insert_average_nstd_params(conn=conn, average_nstd_params=average_nstd_params)
+
+    @staticmethod
+    def insert_average_nstd_result(average_nstd_result: ARMAverageNSTDResult) -> None:
+        with engine.begin() as conn:
+            DBAverageNSTD.insert_average_nstd_result(conn=conn, average_nstd_result=average_nstd_result)

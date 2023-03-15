@@ -8,15 +8,21 @@ from plotly.express.colors import sample_colorscale
 
 class FigureNumericalIntegration:
     def __init__(self):
-        self.fig = make_subplots(rows=1, cols=2, shared_yaxes=True, horizontal_spacing=0.03)
-        self.colorscale = 'Plasma'
+        self.fig = make_subplots(rows=1, cols=2, shared_yaxes=True, horizontal_spacing=0.06)
+        self.colorscale = 'turbo'
 
     def make_plot(self, sim_id1: int, sim_id2: int):
         self._build_plot(sim_id=sim_id1, row=1, col=1, inset_axis_number=3)
         self._build_plot(sim_id=sim_id2, row=1, col=2, inset_axis_number=4)
         self._add_colorbar()
+        self._add_annotations()
         self.fig.update_layout(self._layout())
         self.fig.show()
+        self.save_fig(filename='Figures/FigureNumericalIntegration.pdf')
+
+    def save_fig(self, filename: str):
+        for i in range(2):
+            self.fig.write_image(filename)
 
     def _layout(self):
         # Main plots
@@ -24,26 +30,28 @@ class FigureNumericalIntegration:
         line_width = 3
 
         # Inset
-        inset_font_size = 23
+        inset_font_size = 20
         inset_line_width = 2
 
+        #Xaxis
+        xaxis = dict(title=dict(text='Opinion'), tickvals=[-5, 0, 4.95], ticktext=['-5', '0', '5'],  showgrid=False, showline=True, linecolor='black', linewidth=line_width)
         layout = go.Layout(
-            width=2000,
-            height=1000,
+            width=1000,
+            height=600,
             font=dict(size=font_size, color='black'),
-            xaxis=dict(title=dict(text='Opinion'), showgrid=False, showline=True, linecolor='black', linewidth=line_width),
-            xaxis2=dict(title=dict(text='Opinion'), showgrid=False, showline=True, linecolor='black', linewidth=line_width),
+            xaxis=xaxis,
+            xaxis2=xaxis,
             yaxis=dict(title=dict(text='Density'), showgrid=True, showline=True, linecolor='black', linewidth=line_width),
             yaxis2=dict(showgrid=True, showline=False),
-            xaxis3=dict(title=dict(text='Time', font=dict(size=inset_font_size)), tickfont=dict(size=inset_font_size), domain=[0.081, 0.178], anchor='y3', showgrid=False, showline=True, linecolor='black', linewidth=inset_line_width),
-            yaxis3=dict(title=dict(text='HHI', font=dict(size=inset_font_size)), tickfont=dict(size=inset_font_size), domain=[0.65, 0.9], anchor='x3', showgrid=False, showline=True, linecolor='black', linewidth=inset_line_width),
-            xaxis4=dict(title=dict(text='Time', font=dict(size=inset_font_size)), tickfont=dict(size=inset_font_size), domain=[0.597, 0.7], anchor='y4', showgrid=False, showline=True, linecolor='black', linewidth=inset_line_width),
-            yaxis4=dict(title=dict(text='HHI', font=dict(size=inset_font_size)), tickfont=dict(size=inset_font_size), domain=[0.65, 0.9], anchor='x4', showgrid=False, showline=True, linecolor='black', linewidth=inset_line_width),
+            xaxis3=dict(title=dict(text='Time', font=dict(size=inset_font_size), standoff=10), tickfont=dict(size=inset_font_size), tickvals=[], domain=[0.1, 0.2], anchor='y3', showgrid=False, showline=True, linecolor='black', linewidth=inset_line_width),
+            yaxis3=dict(title=dict(text='Diversity', font=dict(size=inset_font_size), standoff=0), tickfont=dict(size=inset_font_size), range=[0,6], tickvals=[0, 6], domain=[0.73, 0.952], anchor='x3', showgrid=False, showline=True, linecolor='black', linewidth=inset_line_width),
+            xaxis4=dict(title=dict(text='Time', font=dict(size=inset_font_size), standoff=10), tickfont=dict(size=inset_font_size), tickvals=[], domain=[0.64, 0.74], anchor='y4', showgrid=False, showline=True, linecolor='black', linewidth=inset_line_width),
+            yaxis4=dict(title=dict(text='Diversity', font=dict(size=inset_font_size), standoff=0), tickfont=dict(size=inset_font_size), range=[0,6], tickvals=[0, 6], domain=[0.73, 0.952], anchor='x4', showgrid=False, showline=True, linecolor='black', linewidth=inset_line_width),
             showlegend=False)
         return layout
 
     def _add_colorbar(self):
-        colorbar_trace = go.Scatter(x=[None], y=[None], mode='markers', marker=dict(colorscale=self.colorscale, showscale=True, cmin=-5, cmax=5, colorbar=dict(thickness=10, tickvals=[-5, 5], ticktext=['0', '20'], outlinewidth=0, title=dict(text="Time", side="right"))))
+        colorbar_trace = go.Scatter(x=[None], y=[None], mode='markers', marker=dict(colorscale=self.colorscale, showscale=True, cmin=-5, cmax=5, colorbar=dict(thickness=10, tickvals=[], ticktext=[], outlinewidth=0, title=dict(text="Time", side="right"))))
         self.fig.add_trace(colorbar_trace, row=1, col=2)
 
     def _build_plot(self, sim_id: int, row: int, col: int, inset_axis_number: int):
@@ -64,12 +72,23 @@ class FigureNumericalIntegration:
 
     def _plot_l2_norm_in_inset(self, result: SimulationResult, xaxis: str, yaxis: str):
         l2_norm_df = result.get_l2_norm_df()
+        print('MAX L2', l2_norm_df.max())
         trace = go.Scatter(x=l2_norm_df.time, y=l2_norm_df.l2_norm, mode='lines', xaxis=xaxis, yaxis=yaxis, line=dict(color='red'))
         self.fig.add_trace(trace)
+
+    def _add_annotations(self):
+        x1, x2 = -0.13, 0.499
+        y1 = 1.04
+        font = dict(size=50)
+        self.fig.add_annotation(text="A", xref="paper", yref="paper", x=x1, y=y1, showarrow=False, font=font)
+        self.fig.add_annotation(text="B", xref="paper", yref="paper", x=x2, y=y1, showarrow=False, font=font)
+
+
+
 
 
 if __name__ == '__main__':
     f = FigureNumericalIntegration()
-    f.make_plot(sim_id1=2, sim_id2=3)
+    f.make_plot(sim_id1=29, sim_id2=30)
 
 
