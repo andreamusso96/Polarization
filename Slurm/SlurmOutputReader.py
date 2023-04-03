@@ -78,7 +78,7 @@ class SlurmOutputReader:
 
 class SimulationOutputAnalyser:
     def __init__(self, min_job_id: int):
-        self.folder_path = CODE_PATH + '/Slurm/SlurmOutput/'
+        self.folder_path = CODE_PATH + '/Slurm/SlurmOutput/AverageNSTDSims/'
         self.min_job_id = min_job_id
         self.file_names = self.get_slurm_file_names()
 

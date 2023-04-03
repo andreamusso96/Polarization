@@ -19,7 +19,7 @@ class ARMAverageNSTDInitializer:
 
     @staticmethod
     def get_parameters() -> List[ARMAverageNSTDParams]:
-        n = 1000
+        n = 100
         ts = np.linspace(0.05, 1, 20)
         rs = np.linspace(0.05, 1, 20)
         es = np.array([0.1])

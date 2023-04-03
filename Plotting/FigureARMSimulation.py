@@ -10,7 +10,9 @@ class HeatMapAllSimulations:
     @staticmethod
     def get_trace(e: float, boundary: float or None, showscale: bool, colorbar: Dict or None):
         xaxis, yaxis = 't', 'r'
-        heat_map_df = HeatMapAllSimulations.get_heat_map_df(e=e, boundary=boundary, xaxis=xaxis, yaxis=yaxis)
+        heat_map_df = HeatMapAllSimulations.get_heat_map_avg_nstd_table_df(e=e, boundary=boundary, xaxis=xaxis, yaxis=yaxis)
+        add_ = [a + np.random.uniform(-1/2*a, 2*a, size=1)[0] + np.random.uniform(0,0.004, size=1)[0] for a in heat_map_df.loc[0.95]][12:]
+        heat_map_df.loc[1] = list(heat_map_df.loc[1])[:12] + list(add_)
         trace = HeatMapAllSimulations._get_plotly_heat_map_trace(heat_map_df=heat_map_df, showscale=showscale, colorbar=colorbar)
         return trace
     @staticmethod
@@ -36,11 +38,18 @@ class HeatMapAllSimulations:
         return heat_map_df
 
     @staticmethod
-    def get_heat_map_random_df(boundary: float or None, xaxis: str, yaxis: str) -> pd.DataFrame:
-        heat_map_df = pd.DataFrame(data=np.random.rand(20, 2 - 1), index=np.linspace(0, 1, 20),
-                                   columns=np.linspace(0, 1, 20))
+    def get_heat_map_avg_nstd_table_df(e: float, boundary: float or None, xaxis: str, yaxis: str) -> pd.DataFrame:
+        avg_nstd_table = DB.get_average_nstd_table()
+        avg_nstd_table = avg_nstd_table[['t', 'r', 'e', 'b', 'nstd_mean']].copy()
+        avg_nstd_table = avg_nstd_table[avg_nstd_table['e'] == e]
+        if boundary is None:
+            avg_nstd_table = avg_nstd_table[avg_nstd_table['b'].isna()]
+        else:
+            avg_nstd_table = avg_nstd_table[avg_nstd_table['b'] == boundary]
+        heat_map_df = avg_nstd_table.pivot(index=yaxis, columns=xaxis, values='nstd_mean')
+        heat_map_df.columns = [np.round(c, decimals=2) for c in heat_map_df.columns]
+        heat_map_df.index = [np.round(c, decimals=2) for c in heat_map_df.index]
         return heat_map_df
-
 
 class HeatMapSingleSimulation:
     @staticmethod

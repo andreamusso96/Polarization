@@ -145,11 +145,12 @@ def plot_arm():
 
 
 def plot_sims():
-    ids = DB.get_sim_ids(param_values=[ParameterValue(name='complete', value=True)])
-    ids_all = DB.get_sim_ids()
-    print(len(ids_all) - len(ids))
+    from PlotARM import PlotARM
+    ids = DB.get_sim_ids(param_values=[ParameterValue(name='complete', value=True)], param_ranges=[ParameterRange(name='r', max_val=2, min_val=0.98), ParameterRange(name='t', max_val=2, min_val=0.98)], arm=True)
+    for id in ids:
+        PlotARM.plot_arm_result(sim_id=id)
 
 
 
 if __name__ == '__main__':
-    plot_r1()
+    plot_sims()
